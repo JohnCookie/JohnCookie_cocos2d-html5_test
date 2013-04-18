@@ -50,4 +50,6 @@ var cocos2dApp = cc.Application.extend({
     }
 });
 console.log("main.js load");
-var myApp = new cocos2dApp(MyFirstAppScene);
+// var myApp = new cocos2dApp(MyFirstAppScene);
+// var myApp2 = new cocos2dApp(MySecondAppScene);
+var myApp2 = new cocos2dApp(PivotScene);
