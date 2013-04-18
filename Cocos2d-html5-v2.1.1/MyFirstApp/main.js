@@ -34,6 +34,7 @@ var cocos2dApp = cc.Application.extend({
             cc.AppController.shareAppController().didFinishLaunchingWithOptions();
         };
         cc.Loader.getInstance().preload([
+            {type:"image", src:"./res/Jet.png"}
             /*
                 {type:"plist",src:"Themes/spritesheet1.plist"},
                 {type:"plist",src:"Themes/spritesheet2.plist"}

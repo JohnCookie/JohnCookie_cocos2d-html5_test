@@ -4,8 +4,9 @@ var PivotCenter = cc.Layer.extend({
 		var jetSprite = cc.Sprite.create('./res/Jet.png');
 
 		jetSprite.setPosition(new cc.Point(150,150));
-		//Confused.. setAnchorPoint doesn't works
-		jetSprite.setAnchorPoint(cc.PointMake(-1,-1));
+		//The res used by sprite should be preloaded before create the sprite
+		//otherwise all the operate of texture will failed (can't find the texture)
+		jetSprite.setAnchorPoint(cc.PointMake(0,0));
 
 		var size = cc.Director.getInstance().getWinSize();
 		console.log(jetSprite);
