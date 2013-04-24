@@ -1,7 +1,7 @@
 var PivotCenter = cc.Layer.extend({
 	init:function(){
 		var layer1 = cc.LayerColor.create(new cc.Color4B(128,128,128,255),300,300);
-		var jetSprite = cc.Sprite.create('./res/Jet.png');
+		var jetSprite = cc.Sprite.create('res/Jet.png');
 
 		jetSprite.setPosition(new cc.Point(150,150));
 		//The res used by sprite should be preloaded before create the sprite

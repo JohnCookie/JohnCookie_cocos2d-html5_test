@@ -1,7 +1,7 @@
 var JetSprite = cc.Sprite.extend({
 	_currentRotation:0,
 	ctor:function(){
-		this.initWithFile("./res/Jet.png");
+		this.initWithFile("res/Jet.png");
 	},
 	update:function(dt){
 		this.setRotation(this._currentRotation);

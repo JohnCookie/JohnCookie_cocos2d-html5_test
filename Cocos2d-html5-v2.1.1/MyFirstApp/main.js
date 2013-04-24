@@ -33,12 +33,18 @@ var cocos2dApp = cc.Application.extend({
         cc.Loader.getInstance().onload = function () {
             cc.AppController.shareAppController().didFinishLaunchingWithOptions();
         };
+        cc.AudioEngine.getInstance().init("mp3,ogg,wav");
         cc.Loader.getInstance().preload([
-            {type:"image", src:"./res/Jet.png"}
             /*
                 {type:"plist",src:"Themes/spritesheet1.plist"},
                 {type:"plist",src:"Themes/spritesheet2.plist"}
             */
+            //res for Sprite Demo
+            {type:"image", src:"res/Jet.png"},
+            //res for Audio Demo
+            //In version 2.1.1 both effect&bgm type changed to sound
+            {type:"sound", src:"res/effect2"},
+            {type:"sound", src:"res/background"}
         ]);
     },
     applicationDidFinishLaunching:function () {
@@ -53,5 +59,6 @@ var cocos2dApp = cc.Application.extend({
 console.log("main.js load");
 // var myApp = new cocos2dApp(MyFirstAppScene);
 // var myApp = new cocos2dApp(MySecondAppScene);
-// var myApp = new cocos2dApp(PivotScene);
-var myApp = new cocos2dApp(MyThirdAppScene);
+var myApp = new cocos2dApp(PivotScene);
+// var myApp = new cocos2dApp(MyThirdAppScene);
+// var myApp =  new cocos2dApp(MyFourthAppScene);
