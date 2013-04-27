@@ -44,7 +44,8 @@ var cocos2dApp = cc.Application.extend({
             //res for Audio Demo
             //In version 2.1.1 both effect&bgm type changed to sound
             {type:"sound", src:"res/effect2"},
-            {type:"sound", src:"res/background"}
+            {type:"sound", src:"res/background"},
+            {type:"plist", src:"res/spritesheet/walk.plist"}
         ]);
     },
     applicationDidFinishLaunching:function () {
@@ -59,6 +60,7 @@ var cocos2dApp = cc.Application.extend({
 console.log("main.js load");
 // var myApp = new cocos2dApp(MyFirstAppScene);
 // var myApp = new cocos2dApp(MySecondAppScene);
-var myApp = new cocos2dApp(PivotScene);
+// var myApp = new cocos2dApp(PivotScene);
 // var myApp = new cocos2dApp(MyThirdAppScene);
 // var myApp =  new cocos2dApp(MyFourthAppScene);
+var myApp = new cocos2dApp(MyFifthAppScene);
