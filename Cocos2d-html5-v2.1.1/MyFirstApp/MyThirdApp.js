@@ -45,7 +45,7 @@ var MyThirdApp =  cc.Layer.extend({
 	}
 });
 
-MyThirdAppScene = cc.Scene.extend({
+var MyThirdAppScene = cc.Scene.extend({
 	onEnter:function(){
 		this._super();
 		var layer=new MyThirdApp();
