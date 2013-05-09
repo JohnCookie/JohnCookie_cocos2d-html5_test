@@ -45,7 +45,10 @@ var cocos2dApp = cc.Application.extend({
             //In version 2.1.1 both effect&bgm type changed to sound
             {type:"sound", src:"res/effect2"},
             {type:"sound", src:"res/background"},
-            {type:"plist", src:"res/spritesheet/walk.plist"}
+            {type:"plist", src:"res/spritesheet/walk.plist"},
+            //res for SpriteShootDemo
+            {type:"image", src:"res/arrow.png"},
+            {type:"image", src:"res/hero.png"}
         ]);
     },
     applicationDidFinishLaunching:function () {
@@ -64,4 +67,5 @@ console.log("main.js load");
 // var myApp = new cocos2dApp(MyThirdAppScene);
 // var myApp =  new cocos2dApp(MyFourthAppScene);
 // var myApp = new cocos2dApp(MyFifthAppScene);
-var myApp = new cocos2dApp(TutorialEntryMenuScene);
+// var myApp = new cocos2dApp(TutorialEntryMenuScene);
+var myApp = new cocos2dApp(SpriteShootDemoScene);
