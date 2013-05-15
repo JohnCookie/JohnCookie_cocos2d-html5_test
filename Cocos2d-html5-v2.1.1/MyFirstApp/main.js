@@ -68,4 +68,5 @@ console.log("main.js load");
 // var myApp =  new cocos2dApp(MyFourthAppScene);
 // var myApp = new cocos2dApp(MyFifthAppScene);
 // var myApp = new cocos2dApp(TutorialEntryMenuScene);
-var myApp = new cocos2dApp(SpriteShootDemoScene);
+// var myApp = new cocos2dApp(SpriteShootDemoScene);
+var myApp = new cocos2dApp(SimpleCollisionScene);
