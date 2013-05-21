@@ -1,7 +1,9 @@
 var SimpleCollisionLayer = cc.Layer.extend({
-	ball1:null,
-	ball2:null,
+	// ball1:null,
+	// ball2:null,
 	bounceMinus:-1,
+	ballArray:new Array(),
+	ballNum:8,
 	init:function(){
 		this._super();
 		var size = cc.Director.getInstance().getWinSize();
@@ -9,16 +11,32 @@ var SimpleCollisionLayer = cc.Layer.extend({
 		layerColor.setPosition(new cc.Point(0,0));
 		this.addChild(layerColor);
 
-		ball1=new SimpleBall(50, size.height/2, 30, 10, new cc.Color4B(255,0,0,255));
-		ball2=new SimpleBall(550, size.height/2, 40, 15, new cc.Color4B(255,0,100,255));
-		//init the speed of the ball
-		ball1.vx=5*(Math.random()*2-1);
-		ball1.vy=5*(Math.random()*2-1);
-		ball2.vx=5*(Math.random()*2-1);
-		ball2.vy=5*(Math.random()*2-1);
+		// ball1=new SimpleBall(50, size.height/2, 30, 10, new cc.Color4B(255,0,0,255));
+		// ball2=new SimpleBall(550, size.height/2, 40, 15, new cc.Color4B(255,0,100,255));
+		// //init the speed of the ball
+		// ball1.vx=5*(Math.random()*2-1);
+		// ball1.vy=5*(Math.random()*2-1);
+		// ball2.vx=5*(Math.random()*2-1);
+		// ball2.vy=5*(Math.random()*2-1);
 
-		layerColor.addChild(ball1);
-		layerColor.addChild(ball2);
+		//init balls
+		for(var i=0;i<this.ballNum;i++){
+			var ball=new SimpleBall(60*(i+1),60*(i+1),30,10,new cc.Color4B(255,0,0,255));
+			ball.radius=Math.random()*25+10;
+			ball.mass=ball.radius/1.5;
+			ball.color=new cc.Color4B(Math.random()*180+50,Math.random()*180+50,Math.random()*180+50,255);
+			ball.vx=5*(Math.random()*2-1);
+			ball.vy=5*(Math.random()*2-1);
+			this.ballArray.push(ball);
+		}
+
+		console.log("array",this.ballArray);
+		for(var i=0;i<this.ballArray.length;i++){
+			console.log(this.ballArray[i]);
+			layerColor.addChild(this.ballArray[i]);
+		}
+		// layerColor.addChild(ball1);
+		// layerColor.addChild(ball2);
 
 		this.schedule(this.update);
 		
@@ -26,11 +44,67 @@ var SimpleCollisionLayer = cc.Layer.extend({
 	},
 	update:function(){
 		//Update the ball position
-		ball1.x+=ball1.vx;
-		ball1.y+=ball1.vy;
-		ball2.x+=ball2.vx;
-		ball2.y+=ball2.vy;
+		// ball1.x+=ball1.vx;
+		// ball1.y+=ball1.vy;
+		// ball2.x+=ball2.vx;
+		// ball2.y+=ball2.vy;
+		for(var i=0;i<this.ballArray.length;i++){
+			this.ballArray[i].x+=this.ballArray[i].vx;
+			this.ballArray[i].y+=this.ballArray[i].vy;
+			this.checkBounce(this.ballArray[i]);
+		}
 
+		for(var k=0;k<this.ballArray.length-1;k++){
+			for(var s=k+1;s<this.ballArray.length;s++){
+				this.checkCollision(this.ballArray[k],this.ballArray[s]);
+			}
+		}
+		// this.checkCollision(ball1,ball2);
+		//bounce when touch the border
+		// on only x-axis
+		/*
+		if(ball1.x<=0+ball1.radius || ball1.x>=600-ball1.radius){
+			ball1.x-=ball1.vx;
+			ball1.vx*=this.bounceMinus;
+		}
+		if(ball2.x<=0+ball2.radius || ball2.x>=600-ball2.radius){
+			ball2.x-=ball2.vx;
+			ball2.vx*=this.bounceMinus;
+		}
+		*/
+		// this.checkBounce(ball1);
+		// this.checkBounce(ball2);
+
+		// if (Math.abs(ball1.vx)<=1 && Math.abs(ball2.vx)<=1){
+		// 	cc.log("End");
+		// 	console.log("ball1 vx",ball1.vx);
+		// 	console.log("ball2 vx",ball2.vx);
+		// 	cc.log(ball1);
+		// 	cc.log(ball2);
+		// 	this.unschedule(this.update);
+  //       }
+	},
+	checkBounce: function(ball){
+		if(ball.x<ball.radius){
+			//left
+			ball.x=ball.radius;
+			ball.vx*=this.bounceMinus;
+		}else if(ball.x>600-ball.radius){
+			//right
+			ball.x=600-ball.radius;
+			ball.vx*=this.bounceMinus;
+		}
+		if(ball.y<ball.radius){
+			//bottom
+			ball.y=ball.radius;
+			ball.vy*=this.bounceMinus;
+		}else if(ball.y>600-ball.radius){
+			//top
+			ball.y=600-ball.radius;
+			ball.vy*=this.bounceMinus;
+		}
+	},
+	checkCollision: function(ball1,ball2){
 		//Calculate the distance between 2 ball
 		// var dist=ball1.x-ball2.x; //on x-axis
 		var dx=ball2.x-ball1.x;
@@ -115,50 +189,6 @@ var SimpleCollisionLayer = cc.Layer.extend({
 			ball1.vy=vy1*cos+vx1final*sin;
 			ball2.vx=vx2final*cos-vy2*sin;
 			ball2.vy=vy2*cos+vx2final*sin;
-
-		}
-		//bounce when touch the border
-		// on only x-axis
-		/*
-		if(ball1.x<=0+ball1.radius || ball1.x>=600-ball1.radius){
-			ball1.x-=ball1.vx;
-			ball1.vx*=this.bounceMinus;
-		}
-		if(ball2.x<=0+ball2.radius || ball2.x>=600-ball2.radius){
-			ball2.x-=ball2.vx;
-			ball2.vx*=this.bounceMinus;
-		}
-		*/
-		this.checkBounce(ball1);
-		this.checkBounce(ball2);
-
-		if (Math.abs(ball1.vx)<=1 && Math.abs(ball2.vx)<=1){
-			cc.log("End");
-			console.log("ball1 vx",ball1.vx);
-			console.log("ball2 vx",ball2.vx);
-			cc.log(ball1);
-			cc.log(ball2);
-			this.unschedule(this.update);
-        }
-	},
-	checkBounce: function(ball){
-		if(ball.x<ball.radius){
-			//left
-			ball.x=ball.radius;
-			ball.vx*=this.bounceMinus;
-		}else if(ball.x>600-ball.radius){
-			//right
-			ball.x=600-ball.radius;
-			ball.vx*=this.bounceMinus;
-		}
-		if(ball.y<ball.radius){
-			//bottom
-			ball.y=ball.radius;
-			ball.vy*=this.bounceMinus;
-		}else if(ball.y>600-ball.radius){
-			//top
-			ball.y=600-ball.radius;
-			ball.vy*=this.bounceMinus;
 		}
 	}
 });
