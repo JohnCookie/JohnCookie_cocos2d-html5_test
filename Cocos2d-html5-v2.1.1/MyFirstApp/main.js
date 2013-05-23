@@ -48,7 +48,10 @@ var cocos2dApp = cc.Application.extend({
             {type:"plist", src:"res/spritesheet/walk.plist"},
             //res for SpriteShootDemo
             {type:"image", src:"res/arrow.png"},
-            {type:"image", src:"res/hero.png"}
+            {type:"image", src:"res/hero.png"},
+            //tmx ressources
+            {type:"image", src:"res/tilemap/tmw_desert_spacing.png"},
+            {type:"tmx", src:"res/tilemap/tilemapbg.tmx"}
         ]);
     },
     applicationDidFinishLaunching:function () {
@@ -65,8 +68,9 @@ console.log("main.js load");
 // var myApp = new cocos2dApp(MySecondAppScene);
 // var myApp = new cocos2dApp(PivotScene);
 // var myApp = new cocos2dApp(MyThirdAppScene);
-// var myApp =  new cocos2dApp(MyFourthAppScene);
+// var myApp = new cocos2dApp(MyFourthAppScene);
 // var myApp = new cocos2dApp(MyFifthAppScene);
 // var myApp = new cocos2dApp(TutorialEntryMenuScene);
 // var myApp = new cocos2dApp(SpriteShootDemoScene);
-var myApp = new cocos2dApp(SimpleCollisionScene);
+// var myApp = new cocos2dApp(SimpleCollisionScene);
+var myApp = new cocos2dApp(TileMapScene); 

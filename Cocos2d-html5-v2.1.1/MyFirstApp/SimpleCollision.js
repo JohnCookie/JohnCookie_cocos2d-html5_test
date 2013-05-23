@@ -3,7 +3,7 @@ var SimpleCollisionLayer = cc.Layer.extend({
 	// ball2:null,
 	bounceMinus:-1,
 	ballArray:new Array(),
-	ballNum:8,
+	ballNum:15,
 	init:function(){
 		this._super();
 		var size = cc.Director.getInstance().getWinSize();
