@@ -3,11 +3,11 @@ var SimpleCollisionLayer = cc.Layer.extend({
 	// ball2:null,
 	bounceMinus:-1,
 	ballArray:new Array(),
-	ballNum:15,
+	ballNum:1,
 	init:function(){
 		this._super();
 		var size = cc.Director.getInstance().getWinSize();
-		var layerColor = cc.LayerColor.create(new cc.Color4B(128,128,128,255),600,600);
+		var layerColor = cc.LayerColor.create(new cc.Color4B(128,128,128,0),600,600);
 		layerColor.setPosition(new cc.Point(0,0));
 		this.addChild(layerColor);
 
@@ -54,6 +54,13 @@ var SimpleCollisionLayer = cc.Layer.extend({
 			this.checkBounce(this.ballArray[i]);
 		}
 
+		var walls=Game.currMap.getObjectGroup("blocks").getObjects();
+		for(var m=0;m<walls.length;m++){
+			for(var n=0;n<this.ballArray.length;n++){
+				this.checkWallBounce(this.ballArray[n],walls[m]);
+			}
+		}
+
 		for(var k=0;k<this.ballArray.length-1;k++){
 			for(var s=k+1;s<this.ballArray.length;s++){
 				this.checkCollision(this.ballArray[k],this.ballArray[s]);
@@ -85,25 +92,136 @@ var SimpleCollisionLayer = cc.Layer.extend({
   //       }
 	},
 	checkBounce: function(ball){
-		if(ball.x<ball.radius){
+		if(ball.x<ball.radius+Game.currWorldPoint.x){
 			//left
-			ball.x=ball.radius;
+			ball.x=ball.radius+Game.currWorldPoint.x;
 			ball.vx*=this.bounceMinus;
-		}else if(ball.x>600-ball.radius){
+		}else if(ball.x>32*40+Game.currWorldPoint.x-ball.radius){
 			//right
-			ball.x=600-ball.radius;
+			ball.x=32*40+Game.currWorldPoint.x-ball.radius;
 			ball.vx*=this.bounceMinus;
 		}
-		if(ball.y<ball.radius){
+		if(ball.y<ball.radius+Game.currWorldPoint.y){
 			//bottom
-			ball.y=ball.radius;
+			ball.y=ball.radius+Game.currWorldPoint.y;
 			ball.vy*=this.bounceMinus;
-		}else if(ball.y>600-ball.radius){
+		}else if(ball.y>32*40+Game.currWorldPoint.y-ball.radius){
 			//top
-			ball.y=600-ball.radius;
+			ball.y=32*40+Game.currWorldPoint.y-ball.radius;
 			ball.vy*=this.bounceMinus;
 		}
 	},
+	checkWallBounce: function(ball,wall){
+		// 还原圆的位置
+		var temp=Game.currWorldPoint;
+		ball.x-=temp.x;
+		ball.y-=temp.y;
+		// 找出矩形和圆的碰撞检测点
+		var detectPoint=this.getDetectionPoint(ball,wall);
+		// 检测探测点和现在的关系
+		var dist=Math.sqrt(Math.pow(Math.abs(detectPoint.x-ball.x),2)+Math.pow(Math.abs(detectPoint.y-ball.y),2)); // 2/a^2+b^2
+		if(dist<=ball.radius){
+			var overlap=ball.radius-dist;
+			// 后退到刚好接触
+			if(overlap>0){
+				// 重合的这段距离正常需要走多久（每帧的百分比）
+				var goPerDist=Math.sqrt(Math.pow(ball.vx, 2)+Math.pow(ball.vy, 2)); // 每帧可以走这么多
+				var radio=overlap/goPerDist;
+
+				ball.x=ball.x-ball.vx*radio;
+				ball.y=ball.y-ball.vy*radio;
+			}
+
+			var detectPoint2=this.getDetectionPoint(ball,wall); //真实的探测点 这时候应该肯定是1234的position位置 不会出现5678了
+			switch(detectPoint2.position){
+				case 1:
+				case 3:
+					//x方向反转 y方向不变
+					ball.vx*=(parseInt(wall.bounce)*-1);
+					break;
+				case 2:
+				case 4:
+					ball.vy*=(parseInt(wall.bounce)*-1);
+					break;
+				default:
+					//以防万一
+					ball.vx*=(parseInt(wall.bounce)*-1);
+					break;
+			}
+		}
+		// 再还原回世界坐标
+		ball.x+=temp.x;
+		ball.y+=temp.y;
+	},
+	// checkCircleRectCollision: function(w, h, r, rx, ry) {
+ //        var dx = Math.min(rx, w * 0.5);
+ //        var dx1 = Math.max(dx, -w * 0.5);
+ //        var dy = Math.min(ry, h * 0.5);
+ //        var dy1 = Math.max(dy, -h * 0.5);
+ //        return (dx1 - rx) * (dx1 - rx) + (dy1 - ry) * (dy1 - ry) <= r * r;
+ //    },
+ 	getDetectionPoint: function(ball,wall){
+ 		// 返回 点x,y,dx,dy,p{0 内部 1 左 2 上 3 右 4 下 5 左上 6 右上 7 左下 8 右下}
+ 		var ret={};
+ 		// x方向
+ 		var tempx=0;
+ 		var tempy=0;
+ 		if(ball.x<wall.x){
+ 			ret.x=wall.x;
+ 			ret.dx=Math.abs(ball.x-wall.x);
+ 			tempx=1;
+ 		}else if(ball.x>wall.x+wall.width){
+ 			ret.x=wall.x+wall.width;
+ 			ret.dx=Math.abs(wall.x+wall.width-ball.x);
+ 			tempx=2;
+ 		}else{
+ 			ret.x=ball.x;
+ 			ret.dx=1000;
+ 			tempx=0;
+ 		}
+ 		// y方向
+ 		if(ball.y<wall.y){
+ 			ret.y=wall.y;
+ 			ret.dy=Math.abs(ball.y-wall.y);
+ 			tempy=1;
+ 		}else if(ball.y>wall.y+wall.height){
+ 			ret.y=wall.y+wall.height;
+ 			ret.dy=Math.abs(wall.y+wall.height-ball.y);
+ 			tempy=2;
+ 		}else{
+ 			ret.y=ball.y;
+ 			ret.dy=1000;
+ 			tempy=0;
+ 		}
+ 		//推断出点的位置
+ 		if(tempx==0){
+ 			if(tempy==0){
+ 				//在圆内
+ 				ret.position=0;
+ 			}else if(tempy==1){
+ 				ret.position=4;
+ 			}else if(tempy==2){
+ 				ret.position=2;
+ 			}
+ 		}else if(tempx==1){
+ 			if(tempy==0){
+ 				ret.position=1;
+ 			}else if(tempy==1){
+ 				ret.position=7;
+ 			}else if(tempy==2){
+ 				ret.position=5;
+ 			}
+ 		}else if(tempx==2){
+ 			if(tempy==0){
+ 				ret.position=3;
+ 			}else if(tempy==1){
+ 				ret.position=8;
+ 			}else if(tempy==2){
+ 				ret.position=6;
+ 			}
+ 		}
+ 		return ret;
+ 	},
 	checkCollision: function(ball1,ball2){
 		//Calculate the distance between 2 ball
 		// var dist=ball1.x-ball2.x; //on x-axis

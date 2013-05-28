@@ -7,12 +7,15 @@ var TileMapLayer=cc.Layer.extend({
 		this.tileMap=cc.TMXTiledMap.create("res/tilemap/tilemapbg.tmx");
 		this.setTouchEnabled(true);
 
-		console.log("layer",this.tileMap.getProperties());
-		console.log("layer",this.tileMap.getMapSize());
-		console.log("layer",this.tileMap.getTileSize());
+		console.log("Properties",this.tileMap.getProperties());
+		console.log("mapSize",this.tileMap.getMapSize());
+		console.log("tileSize",this.tileMap.getTileSize());
+		console.log("blocks obj",this.tileMap.getObjectGroup("blocks"));
+		Game.currMap=this.tileMap;
 
 		this.tileMap.setPosition(new cc.Point(0,0));
 		this.currWorldPoint=new cc.Point(0,0);
+		Game.currWorldPoint=this.currWorldPoint;
 		this.addChild(this.tileMap);
 
 		return true;
@@ -35,6 +38,8 @@ var TileMapLayer=cc.Layer.extend({
 		if(this.currWorldPoint.y<600-this.tileMap.getMapSize().height*this.tileMap.getTileSize().height){
 			this.currWorldPoint.y=600-this.tileMap.getMapSize().height*this.tileMap.getTileSize().height;
 		}
+		this.tileMap.setPosition(this.currWorldPoint);
+		Game.currWorldPoint=this.currWorldPoint;
 		this.__touchBeganPoint=null;
 	},
 	onTouchesBegan: function(pTouch, pEvent){
@@ -61,6 +66,7 @@ var TileMapLayer=cc.Layer.extend({
 			temp.y=600-this.tileMap.getMapSize().height*this.tileMap.getTileSize().height;
 		}
 		this.tileMap.setPosition(temp);
+		Game.currWorldPoint=temp;
 	}
 });
 

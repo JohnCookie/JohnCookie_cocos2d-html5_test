@@ -73,4 +73,5 @@ console.log("main.js load");
 // var myApp = new cocos2dApp(TutorialEntryMenuScene);
 // var myApp = new cocos2dApp(SpriteShootDemoScene);
 // var myApp = new cocos2dApp(SimpleCollisionScene);
-var myApp = new cocos2dApp(TileMapScene); 
+// var myApp = new cocos2dApp(TileMapScene); 
+var myApp = new cocos2dApp(CollisionOnTilemapScene);
