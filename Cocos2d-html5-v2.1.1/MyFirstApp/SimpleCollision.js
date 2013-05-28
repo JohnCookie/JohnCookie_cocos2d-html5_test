@@ -3,7 +3,7 @@ var SimpleCollisionLayer = cc.Layer.extend({
 	// ball2:null,
 	bounceMinus:-1,
 	ballArray:new Array(),
-	ballNum:1,
+	ballNum:8,
 	init:function(){
 		this._super();
 		var size = cc.Director.getInstance().getWinSize();
@@ -92,30 +92,30 @@ var SimpleCollisionLayer = cc.Layer.extend({
   //       }
 	},
 	checkBounce: function(ball){
-		if(ball.x<ball.radius+Game.currWorldPoint.x){
+		if(ball.x<ball.radius){
 			//left
-			ball.x=ball.radius+Game.currWorldPoint.x;
+			ball.x=ball.radius;
 			ball.vx*=this.bounceMinus;
-		}else if(ball.x>32*40+Game.currWorldPoint.x-ball.radius){
+		}else if(ball.x>32*40-ball.radius){
 			//right
-			ball.x=32*40+Game.currWorldPoint.x-ball.radius;
+			ball.x=32*40-ball.radius;
 			ball.vx*=this.bounceMinus;
 		}
-		if(ball.y<ball.radius+Game.currWorldPoint.y){
+		if(ball.y<ball.radius){
 			//bottom
-			ball.y=ball.radius+Game.currWorldPoint.y;
+			ball.y=ball.radius;
 			ball.vy*=this.bounceMinus;
-		}else if(ball.y>32*40+Game.currWorldPoint.y-ball.radius){
+		}else if(ball.y>32*40-ball.radius){
 			//top
-			ball.y=32*40+Game.currWorldPoint.y-ball.radius;
+			ball.y=32*40-ball.radius;
 			ball.vy*=this.bounceMinus;
 		}
 	},
 	checkWallBounce: function(ball,wall){
 		// 还原圆的位置
-		var temp=Game.currWorldPoint;
-		ball.x-=temp.x;
-		ball.y-=temp.y;
+		// var temp=Game.currWorldPoint;
+		// ball.x-=temp.x;
+		// ball.y-=temp.y;
 		// 找出矩形和圆的碰撞检测点
 		var detectPoint=this.getDetectionPoint(ball,wall);
 		// 检测探测点和现在的关系
@@ -131,7 +131,7 @@ var SimpleCollisionLayer = cc.Layer.extend({
 				ball.x=ball.x-ball.vx*radio;
 				ball.y=ball.y-ball.vy*radio;
 			}
-
+			
 			var detectPoint2=this.getDetectionPoint(ball,wall); //真实的探测点 这时候应该肯定是1234的position位置 不会出现5678了
 			switch(detectPoint2.position){
 				case 1:
@@ -143,6 +143,27 @@ var SimpleCollisionLayer = cc.Layer.extend({
 				case 4:
 					ball.vy*=(parseInt(wall.bounce)*-1);
 					break;
+				//还是会有5678 根据速度方向去判断
+				case 5:
+				case 6:
+				case 7:
+				case 8:
+					if(Math.abs(detectPoint2.x-ball.x)-Math.abs(detectPoint2.y-ball.y)>0){
+						ball.vx*=(parseInt(wall.bounce)*-1);
+					}else if(Math.abs(detectPoint2.x-ball.x)-Math.abs(detectPoint2.y-ball.y)<0){
+						ball.vy*=(parseInt(wall.bounce)*-1);
+					}else{
+						//相等
+						if(ball.vx>ball.vy){
+							ball.vy*=(parseInt(wall.bounce)*-1);
+						}else if(ball.vx<ball.vy){
+							ball.vx*=(parseInt(wall.bounce)*-1);
+						}else{
+							ball.vx*=(parseInt(wall.bounce)*-1);
+							ball.vy*=(parseInt(wall.bounce)*-1);
+						}
+					}
+					break;
 				default:
 					//以防万一
 					ball.vx*=(parseInt(wall.bounce)*-1);
@@ -150,8 +171,8 @@ var SimpleCollisionLayer = cc.Layer.extend({
 			}
 		}
 		// 再还原回世界坐标
-		ball.x+=temp.x;
-		ball.y+=temp.y;
+		// ball.x+=temp.x;
+		// ball.y+=temp.y;
 	},
 	// checkCircleRectCollision: function(w, h, r, rx, ry) {
  //        var dx = Math.min(rx, w * 0.5);

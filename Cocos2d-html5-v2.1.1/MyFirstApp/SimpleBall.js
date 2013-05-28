@@ -21,6 +21,7 @@ var SimpleBall = cc.Sprite.extend({
 		this.color=color;
 	},
 	draw:function(){
+		var temp=Game.currWorldPoint;
 		// The draw() method works itself every time canvas update
 		var r=this.color.r;
 		var g=this.color.g;
@@ -29,7 +30,7 @@ var SimpleBall = cc.Sprite.extend({
 		cc.renderContext.fillStyle = "rgba("+r+","+g+","+b+","+a+")";
 		cc.renderContext.lineWidth=5;
         cc.renderContext.strokeStyle = "rgba("+r+","+g+","+b+","+a+")";
-        cc.drawingUtil.drawCircle(cc.p(this.x, this.y), this.radius, 0, 60, true);
+        cc.drawingUtil.drawCircle(cc.p(this.x+Game.currWorldPoint.x, this.y+Game.currWorldPoint.y), this.radius, 0, 60, true);
 	},
 	update:function(dt){
 		// The drawing method don't work in update() method
