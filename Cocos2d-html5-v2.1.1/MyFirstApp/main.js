@@ -51,7 +51,9 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"res/hero.png"},
             //tmx ressources
             {type:"image", src:"res/tilemap/tmw_desert_spacing.png"},
-            {type:"tmx", src:"res/tilemap/tilemapbg.tmx"}
+            {type:"tmx", src:"res/tilemap/tilemapbg.tmx"},
+
+            {type:"image", src:"res/hit.png"}
         ]);
     },
     applicationDidFinishLaunching:function () {
@@ -74,4 +76,5 @@ console.log("main.js load");
 // var myApp = new cocos2dApp(SpriteShootDemoScene);
 // var myApp = new cocos2dApp(SimpleCollisionScene);
 // var myApp = new cocos2dApp(TileMapScene); 
-var myApp = new cocos2dApp(CollisionOnTilemapScene);
+// var myApp = new cocos2dApp(CollisionOnTilemapScene);
+var myApp = new cocos2dApp(SimpleShootScene);

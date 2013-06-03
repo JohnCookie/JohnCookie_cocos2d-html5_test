@@ -10,6 +10,7 @@ var SimpleBall = cc.Sprite.extend({
 	isDragged:false,
 	vr:0,
 	mass:0,
+	blood:100,
 	isActive:true,
 	ctor:function(x, y, radius, mass, color){
 		this._super();
@@ -31,11 +32,28 @@ var SimpleBall = cc.Sprite.extend({
 		cc.renderContext.lineWidth=5;
         cc.renderContext.strokeStyle = "rgba("+r+","+g+","+b+","+a+")";
         cc.drawingUtil.drawCircle(cc.p(this.x+Game.currWorldPoint.x, this.y+Game.currWorldPoint.y), this.radius, 0, 60, true);
+		console.log(cc.drawingUtil);
+		cc.drawingUtil.drawLine(
+			cc.p(this.x+Game.currWorldPoint.x-this.radius,this.y+Game.currWorldPoint.y+this.radius+10),
+			cc.p(this.x+Game.currWorldPoint.x-this.radius+this.blood/100*2*this.radius,this.y+Game.currWorldPoint.y+this.radius+10));
 	},
 	update:function(dt){
 		// The drawing method don't work in update() method
 		// cc.renderContext.fillStyle = "rgba(0,255,255,1)";
 		// cc.renderContext.strokeStyle = "rgba(0,255,0,1)";
 		// cc.drawingUtil.drawCircle(cc.p(this.x, this.y), 100, this.radius, 10, true);
+	},
+	getPosition: function(){
+		var pos={};
+		pos.x=this.x;
+		pos.y=this.y;
+		return pos;
+	},
+	reduceBlood: function(reduceBlood){
+		this.blood-=reduceBlood;
+		if(this.blood<=0){
+			this.blood=0;
+			alert("die");
+		}
 	}
 });

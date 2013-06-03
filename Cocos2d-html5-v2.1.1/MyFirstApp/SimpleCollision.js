@@ -55,6 +55,12 @@ var SimpleCollisionLayer = cc.Layer.extend({
 		}
 
 		var walls=Game.currMap.getObjectGroup("blocks").getObjects();
+
+		for(var m=0;m<this.ballArray.length;m++){
+			for(var n=0;n<walls.length;n++){
+				this.replaceBall(this.ballArray[m],walls[n]);
+			}
+		}
 		for(var m=0;m<walls.length;m++){
 			for(var n=0;n<this.ballArray.length;n++){
 				this.checkWallBounce(this.ballArray[n],walls[m]);
@@ -111,28 +117,95 @@ var SimpleCollisionLayer = cc.Layer.extend({
 			ball.vy*=this.bounceMinus;
 		}
 	},
+	replaceBall: function(ball,wall){
+		var detectPoint=this.getDetectionPoint(ball,wall);
+		var dist=Math.sqrt(Math.pow(Math.abs(detectPoint.x-ball.x),2)+Math.pow(Math.abs(detectPoint.y-ball.y),2)); // 2/a^2+b^2
+		var overlap=ball.radius-dist;
+
+		if(overlap>0){
+			//计算移动到与X相切和Y相切所需要的时间 从而确定以哪个为标准
+			switch(detectPoint.position){
+				case 1:
+					var t=overlap/ball.vx;
+					ball.x=ball.x-overlap;
+					ball.y=ball.y-ball.vy*t;
+					break;
+				case 3: 
+					var t=overlap/ball.vx;
+					ball.x=ball.x+overlap;
+					ball.y=ball.y-ball.vy*t;
+					break;
+				case 2:
+					var t=overlap/ball.vy;
+					ball.y=ball.y+overlap;
+					ball.x=ball.x-ball.vx*t;
+					break;
+				case 4:
+					var t=overlap/ball.vy;
+					ball.y=ball.y-overlap;
+					ball.x=ball.x-ball.vx*t;
+					break;
+				case 5:
+					var tx=Math.abs(ball.x+ball.radius-wall.x)/ball.vx;
+					var ty=Math.abs(ball.y-ball.radius-wall.y-wall.height)/ball.vy;
+					if(tx>=ty){
+						//以Y为准
+						ball.x=ball.x-ball.vx*ty;
+						ball.y=ball.y-ball.vy*ty;
+					}else{
+						ball.x=ball.x-ball.vx*tx;
+						ball.y=ball.y-ball.vy*tx;
+					}
+					break;
+				case 6:
+					var tx=Math.abs(ball.x-ball.radius-wall.x-wall.width)/ball.vx;
+					var ty=Math.abs(ball.y-ball.radius-wall.y-wall.height)/ball.vy;
+					if(tx>=ty){
+						//以Y为准
+						ball.x=ball.x-ball.vx*ty;
+						ball.y=ball.y-ball.vy*ty;
+					}else{
+						ball.x=ball.x-ball.vx*tx;
+						ball.y=ball.y-ball.vy*tx;
+					}
+					break;
+				case 7:
+					var tx=Math.abs(ball.x+ball.radius-wall.x)/ball.vx;
+					var ty=Math.abs(ball.y+ball.radius-wall.y)/ball.vy;
+					if(tx>=ty){
+						//以Y为准
+						ball.x=ball.x-ball.vx*ty;
+						ball.y=ball.y-ball.vy*ty;
+					}else{
+						ball.x=ball.x-ball.vx*tx;
+						ball.y=ball.y-ball.vy*tx;
+					}
+					break;
+				case 8:
+					var tx=Math.abs(ball.x-ball.radius-wall.x-wall.width)/ball.vx;
+					var ty=Math.abs(ball.y+ball.radius-wall.y)/ball.vy;
+					if(tx>=ty){
+						//以Y为准
+						ball.x=ball.x-ball.vx*ty;
+						ball.y=ball.y-ball.vy*ty;
+					}else{
+						ball.x=ball.x-ball.vx*tx;
+						ball.y=ball.y-ball.vy*tx;
+					}
+					break;
+			}
+		}
+	},
 	checkWallBounce: function(ball,wall){
 		// 还原圆的位置
 		// var temp=Game.currWorldPoint;
 		// ball.x-=temp.x;
 		// ball.y-=temp.y;
 		// 找出矩形和圆的碰撞检测点
-		var detectPoint=this.getDetectionPoint(ball,wall);
-		// 检测探测点和现在的关系
-		var dist=Math.sqrt(Math.pow(Math.abs(detectPoint.x-ball.x),2)+Math.pow(Math.abs(detectPoint.y-ball.y),2)); // 2/a^2+b^2
-		if(dist<=ball.radius){
-			var overlap=ball.radius-dist;
-			// 后退到刚好接触
-			if(overlap>0){
-				// 重合的这段距离正常需要走多久（每帧的百分比）
-				var goPerDist=Math.sqrt(Math.pow(ball.vx, 2)+Math.pow(ball.vy, 2)); // 每帧可以走这么多
-				var radio=overlap/goPerDist;
 
-				ball.x=ball.x-ball.vx*radio;
-				ball.y=ball.y-ball.vy*radio;
-			}
-			
-			var detectPoint2=this.getDetectionPoint(ball,wall); //真实的探测点 这时候应该肯定是1234的position位置 不会出现5678了
+		var detectPoint2=this.getDetectionPoint(ball,wall);
+		var dist=Math.sqrt(Math.pow(Math.abs(detectPoint2.x-ball.x),2)+Math.pow(Math.abs(detectPoint2.y-ball.y),2));
+		if(dist<=ball.radius){
 			switch(detectPoint2.position){
 				case 1:
 				case 3:
@@ -143,30 +216,82 @@ var SimpleCollisionLayer = cc.Layer.extend({
 				case 4:
 					ball.vy*=(parseInt(wall.bounce)*-1);
 					break;
-				//还是会有5678 根据速度方向去判断
+				//还是会有5678
 				case 5:
-				case 6:
-				case 7:
-				case 8:
-					if(Math.abs(detectPoint2.x-ball.x)-Math.abs(detectPoint2.y-ball.y)>0){
-						ball.vx*=(parseInt(wall.bounce)*-1);
-					}else if(Math.abs(detectPoint2.x-ball.x)-Math.abs(detectPoint2.y-ball.y)<0){
+					//跟矩形的左上角比
+					if(detectPoint2.x>wall.x){
+						//偏上
 						ball.vy*=(parseInt(wall.bounce)*-1);
-					}else{
-						//相等
-						if(ball.vx>ball.vy){
+					}else if(detectPoint2.y<wall.y+wall.height){
+						//偏左
+						ball.vx*=(parseInt(wall.bounce)*-1);
+					}else if(detectPoint2.x==wall.x && detectPoint2.y==wall.y+wall.height){
+						//角 根据速度方向
+						if(Math.abs(ball.vx)>=Math.abs(ball.vy)){
 							ball.vy*=(parseInt(wall.bounce)*-1);
-						}else if(ball.vx<ball.vy){
-							ball.vx*=(parseInt(wall.bounce)*-1);
 						}else{
 							ball.vx*=(parseInt(wall.bounce)*-1);
+						}
+					}
+					break;
+				case 6:
+					//右上
+					if(detectPoint2.x<wall.x+wall.width){
+						//偏上
+						ball.vy*=(parseInt(wall.bounce)*-1);
+					}else if(detectPoint2.y<wall.y+wall.height){
+						//偏左
+						ball.vx*=(parseInt(wall.bounce)*-1);
+					}else if(detectPoint2.x==wall.x+wall.width && detectPoint2.y==wall.y+wall.height){
+						//角 根据速度方向
+						if(Math.abs(ball.vx)>=Math.abs(ball.vy)){
 							ball.vy*=(parseInt(wall.bounce)*-1);
+						}else{
+							ball.vx*=(parseInt(wall.bounce)*-1);
+						}
+					}
+					break;
+				case 7:
+					//左下
+					if(detectPoint2.x>wall.x){
+						//偏上
+						ball.vy*=(parseInt(wall.bounce)*-1);
+					}else if(detectPoint2.y>wall.y){
+						//偏左
+						ball.vx*=(parseInt(wall.bounce)*-1);
+					}else if(detectPoint2.x==wall.x && detectPoint2.y==wall.y){
+						//角 根据速度方向
+						if(Math.abs(ball.vx)>=Math.abs(ball.vy)){
+							ball.vy*=(parseInt(wall.bounce)*-1);
+						}else{
+							ball.vx*=(parseInt(wall.bounce)*-1);
+						}
+					}
+					break;
+				case 8:
+					//右下
+					if(detectPoint2.x<wall.x+wall.width){
+						//偏上
+						ball.vy*=(parseInt(wall.bounce)*-1);
+					}else if(detectPoint2.y>wall.y){
+						//偏左
+						ball.vx*=(parseInt(wall.bounce)*-1);
+					}else if(detectPoint2.x==wall.x+wall.width && detectPoint2.y==wall.y){
+						//角 根据速度方向
+						if(Math.abs(ball.vx)>=Math.abs(ball.vy)){
+							ball.vy*=(parseInt(wall.bounce)*-1);
+						}else{
+							ball.vx*=(parseInt(wall.bounce)*-1);
 						}
 					}
 					break;
 				default:
 					//以防万一
-					ball.vx*=(parseInt(wall.bounce)*-1);
+					if(Math.abs(ball.vx)>=Math.abs(ball.vy)){
+						ball.vy*=(parseInt(wall.bounce)*-1);
+					}else{
+						ball.vx*=(parseInt(wall.bounce)*-1);
+					}
 					break;
 			}
 		}
