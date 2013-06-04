@@ -9,7 +9,7 @@
         frameRate:60,
         tag:'gameCanvas', //the dom element to run cocos2d on
         engineDir:'../cocos2d/',
-        appFiles:['global.js','MyFirstApp.js','MySecondApp.js','JetRotate.js','MyThirdApp.js','JetSprite.js','MyFourthApp.js','MyFifthApp.js','TutorialEntryMenu.js','PointSprite.js','SpriteShootDemo.js','SimpleBall.js','SimpleCollision.js','TileMapDemo.js','CollisionOnTilemapScene.js','SimpleShootDemo.js']
+        appFiles:['global.js','MyFirstApp.js','MySecondApp.js','JetRotate.js','MyThirdApp.js','JetSprite.js','MyFourthApp.js','MyFifthApp.js','TutorialEntryMenu.js','PointSprite.js','SpriteShootDemo.js','SimpleBall.js','SimpleCollision.js','TileMapDemo.js','CollisionOnTilemapScene.js','SimpleBullet.js','SimpleShootDemo.js']
     };
     window.addEventListener('DOMContentLoaded', function () {
         //first load engine file if specified

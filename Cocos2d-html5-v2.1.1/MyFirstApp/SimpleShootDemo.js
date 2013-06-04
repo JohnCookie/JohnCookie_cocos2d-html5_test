@@ -6,7 +6,9 @@ var SimpleShootDemo=cc.Layer.extend({
 	layerColor:null,
 	bounceMinus:-0.7,
 	currActionBall:null,
+	typeLabel:null,
 	__scaleBase:50,
+	bulletArr:new Array(),
 	init: function(){
 		this._super();
 		this.setTouchEnabled(true);
@@ -33,6 +35,10 @@ var SimpleShootDemo=cc.Layer.extend({
 		this.pointSprite.setAnchorPoint(cc.PointMake(0.5,0));
 		// this.addChild(this.pointSprite);
 
+		this.typeLabel=cc.LabelTTF.create("Click to change mode between Melee & Ranged (Melee)", "Arial", 18);
+		this.typeLabel.setPosition(size.width/2,600-30);
+		this.addChild(this.typeLabel);
+
 		this.schedule(this.update);
 	},
 	update: function(){
@@ -44,9 +50,16 @@ var SimpleShootDemo=cc.Layer.extend({
 		this.checkBounce(this.ball1);
 		this.checkBounce(this.ball2);
 
+		if(Game.shootMode==2){
+			for(var k=0;k<this.bulletArr.length;k++){
+				this.bulletArr[k].x+=this.bulletArr[k].vx;
+				this.bulletArr[k].y+=this.bulletArr[k].vy;
+				this.checkBulletCollision(this.bulletArr[k],this.ball2);
+			}
+		}
+
 		var collided=this.checkCollision(this.ball1,this.ball2);
 		if(collided.collided==true){
-			console.log(collided);
 			this.showCollision(collided);
 		}
 
@@ -55,33 +68,60 @@ var SimpleShootDemo=cc.Layer.extend({
 	},
 	onTouchesEnded: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
-		//发射的力量和角度
-		var movedist=Math.sqrt(Math.pow(touchPoint.x-this.touchBeganPoint.x, 2)+Math.pow(touchPoint.y-this.touchBeganPoint.y, 2));
-		var arrowScale=movedist/this.__scaleBase;
-		if(arrowScale>2.5){
-			arrowScale=2.5;
+
+		if(cc.rectContainsPoint(this.typeLabel.getBoundingBox(),touchPoint)){
+			//is touch on the label?
+			if(Game.shootMode==1){
+				Game.shootMode=2;
+				this.typeLabel.setString("Click to change mode between Melee & Ranged (Ranged)");
+			}else if(Game.shootMode==2){
+				Game.shootMode=1;
+				this.typeLabel.setString("Click to change mode between Melee & Ranged (Melee)");
+			}
+		}else{
+			//发射的力量和角度
+			var movedist=Math.sqrt(Math.pow(touchPoint.x-this.touchBeganPoint.x, 2)+Math.pow(touchPoint.y-this.touchBeganPoint.y, 2));
+			var arrowScale=movedist/this.__scaleBase;
+			if(arrowScale>2.5){
+				arrowScale=2.5;
+			}
+
+			var angle = Math.atan2(touchPoint.x-this.touchBeganPoint.x,touchPoint.y-this.touchBeganPoint.y);
+
+			if(Game.shootMode==1){
+				this.ball1.vx=arrowScale*4*Math.sin(angle);
+				this.ball1.vy=arrowScale*4*Math.cos(angle);
+				this.currActionBall=this.ball1;
+			}else if(Game.shootMode==2){
+				var tempBullet=new SimpleBullet(this.ball1.x,this.ball1.y,new cc.Color4B(10,10,10,255));
+				tempBullet.vx=Math.sin(angle)*10;
+				tempBullet.vy=Math.cos(angle)*10;
+				var bid=this.bulletArr.length;
+				tempBullet.id=bid;
+				this.bulletArr.push(tempBullet);
+				
+				this.addChild(tempBullet);
+			}
+			
+
+			this.touchBeganPoint=null;
+			this.removeChild(this.pointSprite);
 		}
-
-		var angle = Math.atan2(touchPoint.x-this.touchBeganPoint.x,touchPoint.y-this.touchBeganPoint.y);
-
-		this.ball1.vx=arrowScale*4*Math.sin(angle);
-		this.ball1.vy=arrowScale*4*Math.cos(angle);
-		this.currActionBall=this.ball1;
-
-		this.touchBeganPoint=null;
-		this.removeChild(this.pointSprite);
-
 	},
 	onTouchesBegan: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
 		this.touchBeganPoint=touchPoint;
+		if(cc.rectContainsPoint(this.typeLabel.getBoundingBox(),touchPoint)){
+			
+		}else{
+			var angle = Math.atan2(touchPoint.x-this.ball1.x,touchPoint.y-this.ball1.y);
+			angle = angle*(180/Math.PI);
+			this.pointSprite.setRotation(angle);
+			this.pointSprite.setScaleY(1);
 
-		var angle = Math.atan2(touchPoint.x-this.ball1.x,touchPoint.y-this.ball1.y);
-		angle = angle*(180/Math.PI);
-		this.pointSprite.setRotation(angle);
-		this.pointSprite.setScaleY(1);
-
-		this.addChild(this.pointSprite);
+			this.addChild(this.pointSprite);
+		}
+		
 	},
 	onTouchesMoved: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
@@ -213,6 +253,35 @@ var SimpleShootDemo=cc.Layer.extend({
 			ball.vy*=this.bounceMinus;
 		}
 	},
+	checkBulletCollision: function(bullet,ball){
+		var dx=ball.x-bullet.x;
+		var dy=ball.y-bullet.y;
+		var dist=Math.sqrt(dx*dx+dy*dy);
+
+		if(dist<=ball.radius){
+			//shoot on target
+			var tpos={"x":bullet.x,"y":bullet.y};
+			this.showCollision(tpos);
+			ball.reduceBlood(10);
+
+			this.removeBullet(bullet);
+		}
+
+		if(bullet.x<0 || bullet.x>600 || bullet.y<0 || bullet.y>600){
+			this.removeBullet(bullet);
+		}
+	},
+	removeBullet: function(bullet){
+		//删除子弹 1 找到id 删掉数组中该id的bullet 并且其他所有处于他之后的bullet id都-1
+		var bid=bullet.id;
+		this.bulletArr=this.bulletArr.del(bid);
+		if(bid<this.bulletArr.length && bid!=0){
+			for(var a=bid;a<this.bulletArr.length;a++){
+				this.bulletArr[a].id-=1;
+			}
+		}
+		this.removeChild(bullet);
+	},
 	showCollision: function(position){
 		var collisionSprite=new cc.Sprite.create("res/hit.png");
 		collisionSprite.setPosition(position.x,position.y);
@@ -224,9 +293,7 @@ var SimpleShootDemo=cc.Layer.extend({
 		collisionSprite.runAction(actionFinal);
 	},
 	releaseSprite: function(layer,sprite){
-		console.log(layer.getChildrenCount());
 		layer.removeChild(sprite);
-		console.log(layer.getChildrenCount());
 	}
 
 });
