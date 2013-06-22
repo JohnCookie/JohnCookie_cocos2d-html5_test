@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="40" height="40" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="tmw_desert_spacing" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="tmw_desert_spacing.png" width="265" height="199"/>
+ </tileset>
+ <layer name="background" width="40" height="40">
+  <data encoding="base64" compression="zlib">
+   eJzt1skKwjAQgOGo4ILgjru1KkhVkL7/0zkXYQiZJukkTaw5fHgp7e80iWZCiCxh24E9w8Fz3wVcGW7oXrlE9+xzw32YaZ+u0Wef6RxD9MW4/nTqzLLpPky1FuX16LrPZE/a7GkffZxG332uPcCT4cV4du75u5m8q6p3nQt352RSTwd0LfQU93gTXPSNLK8fE32FBPdNJanvf/p06/8UuM92Pj76XL6/rxVYKCwt+/pggAwd9anmRKk6/ybgjswC9FVJfbz+NvdRe5Tap033cdbYUZj91wnVZ7pG1mCDbCPr013j+vetrX0lEmvfL85vLugzzjd8hpbSZ2yo+cXqAyn8t4U=
+  </data>
+ </layer>
+ <objectgroup name="blocks" width="40" height="40">
+  <object name="wall1" x="77" y="75" width="511" height="9">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall2" x="589" y="75" width="8" height="321">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall3" x="84" y="397" width="513" height="7">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall4" x="76" y="86" width="7" height="317">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall5" x="288" y="928" width="16" height="127">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall6" x="306" y="927" width="221" height="17">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall7" x="512" y="736" width="15" height="191">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall8" x="529" y="736" width="190" height="16">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall9" x="703" y="527" width="15" height="208">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall10" x="336" y="527" width="365" height="15">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall11" x="335" y="545" width="16" height="159">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall12" x="79" y="687" width="256" height="16">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall13" x="79" y="704" width="17" height="497">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall14" x="98" y="1184" width="974" height="17">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall15" x="1054" y="976" width="16" height="207">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall16" x="767" y="975" width="285" height="17">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="wall17" x="767" y="863" width="15" height="111">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="stone1" x="673" y="96" width="126" height="31">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="stone2" x="769" y="131" width="30" height="61">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="stone3" x="801" y="160" width="62" height="31">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="stone4" x="928" y="223" width="31" height="63">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="stone5" x="961" y="255" width="94" height="31">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="stone6" x="1056" y="383" width="30" height="64">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+  <object name="stone7" x="1088" y="416" width="94" height="31">
+   <properties>
+    <property name="bounce" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>
