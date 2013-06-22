@@ -4,7 +4,7 @@ Game.height=480;
 Game.mapWidth=1280;
 Game.mapHeight=1280;
 Game.currWorldPoint=new cc.Point(0,0);
-Game.showSpriteBorder=true;
+Game.showSpriteBorder=false;
 Game.showSpriteCollisionBorder=false;
 
 var commonColor4B={

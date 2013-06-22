@@ -27,7 +27,7 @@ var GameLayer=cc.Layer.extend({
 		Game.currWorldPoint=this.currWorldPoint;
 	},
 	onTouchesEnded: function(pTouch, pEvent){
-		if(this.mainLayer.status==0){
+		if(this.mainLayer.status==0 && touchNow){
 			var touchNow=pTouch[0].getLocation();
 			var offset=new cc.Point(touchNow.x-this.__touchBeganPoint.x,touchNow.y-this.__touchBeganPoint.y);
 			this.currWorldPoint.x+=offset.x;

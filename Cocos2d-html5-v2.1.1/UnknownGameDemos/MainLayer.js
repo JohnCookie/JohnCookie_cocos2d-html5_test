@@ -4,6 +4,7 @@ var MainLayer=cc.Layer.extend({
 	arrowSprite: null,
 	tempTouchPoint: null,
 	activeSprite: null,
+	lastHurtedSprite: null,
 	status: 0, //0 normal 1 sprite being touched
 	__scaleBase: 50, 
 	init: function(){
@@ -17,6 +18,8 @@ var MainLayer=cc.Layer.extend({
 	},
 	update: function(dt){
 		this.soldierStep();
+		this.checkBorderBounce();
+		this.checkCollision();
 	},
 	onTouchesEnded: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
@@ -165,34 +168,42 @@ var MainLayer=cc.Layer.extend({
 
 		//队伍2
 		//两个近战兵
+		var fixValueX=400;
+		var fixValueY=600;
 		var melee=new BaseSoldierSprite(1,1);
 		this.teamArr2.push(melee);
-		melee.setPosition(Game.mapWidth-300,Game.mapHeight-300);
+		melee.setPosition(Game.mapWidth-300-fixValueX,Game.mapHeight-300-fixValueY);
 		this.addChild(melee);
 		var melee2=new BaseSoldierSprite(1,1);
 		this.teamArr2.push(melee2);
-		melee2.setPosition(Game.mapWidth-200,Game.mapHeight-300);
+		melee2.setPosition(Game.mapWidth-200-fixValueX,Game.mapHeight-300-fixValueY);
 		this.addChild(melee2);
 		//两个远程兵
 		var range=new BaseSoldierSprite(2,1);
 		this.teamArr2.push(range);
-		range.setPosition(Game.mapWidth-300,Game.mapHeight-200);
+		range.setPosition(Game.mapWidth-300-fixValueX,Game.mapHeight-200-fixValueY);
 		this.addChild(range);
 		var range2=new BaseSoldierSprite(2,1);
 		this.teamArr2.push(range2);
-		range2.setPosition(Game.mapWidth-200,Game.mapHeight-200);
+		range2.setPosition(Game.mapWidth-200-fixValueX,Game.mapHeight-200-fixValueY);
 		this.addChild(range2);
 		//一个魔法兵
 		var magic=new BaseSoldierSprite(3,1);
 		this.teamArr2.push(magic);
-		magic.setPosition(Game.mapWidth-250,Game.mapHeight-100);
+		magic.setPosition(Game.mapWidth-250-fixValueX,Game.mapHeight-100-fixValueY);
 		this.addChild(magic);
 	},
 	soldierStep: function(){
+		var factor=1;
 
 		for(var i=0;i<this.teamArr1.length;i++){
-			this.teamArr1[i].vx=this.teamArr1[i].vx*SoldierData[this.teamArr1[i].type]["friction"];
-			this.teamArr1[i].vy=this.teamArr1[i].vy*SoldierData[this.teamArr1[i].type]["friction"];
+			if(this.teamArr1[i]==this.activeSprite){
+				factor=SoldierData[this.teamArr1[i].type]["friction"];
+			}else{
+				factor=SoldierData[this.teamArr1[i].type]["resistance"];
+			}
+			this.teamArr1[i].vx=this.teamArr1[i].vx*factor;
+			this.teamArr1[i].vy=this.teamArr1[i].vy*factor;
 			if(Math.abs(this.teamArr1[i].vx)<=1 && Math.abs(this.teamArr1[i].vy)<=1){
 				this.teamArr1[i].vx=0
 				this.teamArr1[i].vy=0;
@@ -202,8 +213,13 @@ var MainLayer=cc.Layer.extend({
 			this.teamArr1[i].setPosition(this.teamArr1[i].x-30,this.teamArr1[i].y-28);
 		}
 		for(var i=0;i<this.teamArr2.length;i++){
-			this.teamArr2[i].vx=this.teamArr2[i].vx*SoldierData[this.teamArr2[i].type]["friction"];
-			this.teamArr2[i].vy=this.teamArr2[i].vy*SoldierData[this.teamArr2[i].type]["friction"];
+			if(this.teamArr2[i]==this.activeSprite){
+				factor=SoldierData[this.teamArr2[i].type]["friction"];
+			}else{
+				factor=SoldierData[this.teamArr2[i].type]["resistance"];
+			}
+			this.teamArr2[i].vx=this.teamArr2[i].vx*factor;
+			this.teamArr2[i].vy=this.teamArr2[i].vy*factor;
 			if(Math.abs(this.teamArr2[i].vx)<=1 && Math.abs(this.teamArr2[i].vy)<=1){
 				this.teamArr2[i].vx=0;
 				this.teamArr2[i].vy=0;
@@ -211,6 +227,178 @@ var MainLayer=cc.Layer.extend({
 			this.teamArr2[i].x+=this.teamArr2[i].vx;
 			this.teamArr2[i].y+=this.teamArr2[i].vy;
 			this.teamArr2[i].setPosition(this.teamArr2[i].x-30,this.teamArr2[i].y-28);
+		}
+	},
+	checkCollision: function(){
+		if(this.activeSprite){
+			//同队的碰撞
+			for(var i=0;i<this.teamArr1.length-1;i++){
+				for(var j=i+1;j<this.teamArr1.length;j++){
+					var collided=this.ballCollision(this.teamArr1[i],this.teamArr1[j]);
+					if(this.activeSprite.team==1 && collided["collided"]){
+						//2队行动 并且产生了碰撞
+						if(this.teamArr1[i]!=this.lastHurtedSprite){
+							//同一个不会在一次碰撞中连续受到伤害
+							this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
+						}
+						if(this.teamArr1[j]!=this.lastHurtedSprite){
+							this.teamArr1[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[j].type]["def"]);
+						}
+					}
+				}
+			}
+			for(var i=0;i<this.teamArr2.length-1;i++){
+				for(var j=i+1;j<this.teamArr2.length;j++){
+					var collided=this.ballCollision(this.teamArr2[i],this.teamArr2[j]);
+					if(this.activeSprite.team==0 && collided["collided"]){
+						if(this.teamArr2[i]!=this.lastHurtedSprite){
+							//同一个不会在一次碰撞中连续受到伤害
+							this.teamArr2[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[i].type]["def"]);
+						}
+						if(this.teamArr2[j]!=this.lastHurtedSprite){
+							this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
+						}
+					}
+				}
+			}
+			//敌对的碰撞
+			for(var i=0;i<this.teamArr1.length;i++){
+				for(var j=0;j<this.teamArr2.length;j++){
+					var collided=this.ballCollision(this.teamArr1[i],this.teamArr2[j]);
+					if(collided["collided"]){
+						//敌对有碰撞
+						if(this.activeSprite.team==0){
+							//1队行动 2队受伤
+							this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
+							this.lastHurtedSprite=this.teamArr2[j];
+						}
+						if(this.activeSprite.team==1){
+							//2队行动 1队受伤
+							this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
+							this.lastHurtedSprite=this.teamArr1[i];
+						}
+					}
+				}
+			}
+		}
+	},
+	checkBorderBounce: function(){
+		for(var i=0;i<this.teamArr1.length;i++){
+			this.checkBallBounceAtBorder(this.teamArr1[i]);
+		}
+		for(var j=0;j<this.teamArr2.length;j++){
+			this.checkBallBounceAtBorder(this.teamArr2[j]);
+		}
+	},
+	checkBallBounceAtBorder: function(ball){
+		if(ball.x<ball.radius){
+			//left
+			ball.x=ball.radius;
+			ball.vx*=-1;
+		}else if(ball.x>1280-ball.radius){
+			//right
+			ball.x=1280-ball.radius;
+			ball.vx*=-1;
+		}
+		if(ball.y<ball.radius){
+			//bottom
+			ball.y=ball.radius;
+			ball.vy*=-1;
+		}else if(ball.y>1280-ball.radius){
+			//top
+			ball.y=1280-ball.radius;
+			ball.vy*=-1;
+		}
+	},
+	ballCollision: function(ball1,ball2){
+		//Calculate the distance between 2 ball
+		// var dist=ball1.x-ball2.x; //on x-axis
+		var dx=ball2.x-ball1.x;
+		var dy=ball2.y-ball1.y;
+		var dist=Math.sqrt(dx*dx+dy*dy);
+
+		//if 2 balls crashed
+		if(Math.abs(dist)<ball1.radius+ball2.radius){
+			// on x-axis
+			/*
+			// v0final=((m0-m1)v0+2m1v1)/(m0+m1)
+			// v1final=v0final+(v0-v1)
+			var vdx=ball1.vx-ball2.vx;
+			var v1final=((ball1.mass-ball2.mass)*ball1.vx+2*ball2.mass*ball2.vx)/(ball1.mass+ball2.mass);
+			var v2final=v1final+vdx;
+
+			ball1.vx=v1final;
+			ball2.vx=v2final;
+			console.log("v1x",ball1.vx);
+			console.log("v2x",ball2.vx);
+
+			ball1.x+=ball1.vx;
+			ball2.x+=ball2.vx;
+			*/
+
+			// on both x-axis and y-axis
+			var angle=Math.atan2(dy,dx);
+			var cos=Math.cos(angle);
+			var sin=Math.sin(angle);
+
+			// rotate by the center of ball1
+			var x1=0;
+			var y1=0;
+
+			var x2=dx*cos+dy*sin;
+			var y2=dy*cos-dx*sin;
+
+			//the speed after rotate
+			var vx1=ball1.vx*cos+ball1.vy*sin;
+			var vy1=ball1.vy*cos-ball1.vx*sin;
+			var vx2=ball2.vx*cos+ball2.vy*sin;
+			var vy2=ball2.vy*cos-ball2.vx*sin;
+
+			// v0final=((m0-m1)v0+2m1v1)/(m0+m1)
+			// v1final=v0final+(v0-v1)
+			var vdx=vx1-vx2;
+			var vx1final=((ball1.mass-ball2.mass)*vx1+2*ball2.mass*vx2)/(ball1.mass+ball2.mass);
+			var vx2final=vx1final+vdx;
+
+			// the new position
+			// x1+=vx1final;
+			// x2+=vx2final;
+			var sumRadius=ball1.radius+ball2.radius;
+			var overlap=sumRadius-Math.abs(x1-x2);
+			
+			var radio1=ball1.radius/sumRadius;
+			var radio2=ball2.radius/sumRadius;
+
+			if(overlap>0){
+				if(x1>x2){
+					x1+=overlap*radio1;
+					x2-=overlap*radio2;
+				}else{
+					x1-=overlap*radio1;
+					x2+=overlap*radio2;
+				}
+			}
+
+			//rotate back
+			var x1final=x1*cos-y1*sin;
+			var y1final=y1*cos+x1*sin;
+			var x2final=x2*cos-y2*sin;
+			var y2final=y2*cos+x2*sin;
+
+			ball2.x=ball1.x+x2final;
+			ball2.y=ball1.y+y2final;
+			ball1.x+=x1final;
+			ball1.y+=y1final;
+			
+			//final speed
+			ball1.vx=vx1final*cos-vy1*sin;
+			ball1.vy=vy1*cos+vx1final*sin;
+			ball2.vx=vx2final*cos-vy2*sin;
+			ball2.vy=vy2*cos+vx2final*sin;
+
+			return {"x":(ball1.x+ball2.x)/2,"y":(ball1.y+ball2.y)/2,"collided":true};
+		}else{
+			return {"x":(ball1.x+ball2.x)/2,"y":(ball1.y+ball2.y)/2,"collided":false};
 		}
 	}
 });

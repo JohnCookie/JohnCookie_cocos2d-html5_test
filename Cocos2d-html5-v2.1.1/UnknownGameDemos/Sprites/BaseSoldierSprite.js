@@ -5,10 +5,13 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	vx: 0,
 	vy: 0,
 	blood: 100,
+	mass: 0,
+	radius: 20,
 	buff: 0,
 	debuff: 0, 
 	mainSprite: null,
 	bloodSprite: null,
+	bloodChangeSprite: null,
 	hpSprite: null,
 	effectSprite: null,
 	team: 0, //0,1
@@ -20,6 +23,8 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.team=team;
 
 		this.blood=SoldierData[type]["blood"];
+		this.mass=SoldierData[type]["mass"];
+		this.radius=SoldierData[type]["radius"];
 
 		this.setContentSize(new cc.Size(60,70));
 		// 精灵主体
@@ -30,14 +35,14 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.addChild(this.mainSprite);
 		
 		//血条
-		this.bloodSprite=new SimpleBloodSprite();
+		this.bloodSprite=new SimpleBloodSprite(this.blood);
 		this.bloodSprite.setPosition(new cc.Point(10,55));
 		this.addChild(this.bloodSprite);
 
 		//血量变化显示
 		this.bloodChangeSprite=new SimpleHPSprite();
-		this.bloodChangeSprite.setPosition(10,8+40+5);
-		this.addChild(this.bloodChangeSprite);
+		// this.bloodChangeSprite.setPosition(10,8+40+5);
+		// this.addChild(this.bloodChangeSprite);
 
 		//额外的信息层 包含状态 行动力等
 		this.actionPointLabel=cc.LabelTTF.create("18","Arial",10);
@@ -48,7 +53,7 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		//目标框
 		this.effectSprite=new SimpleEffectSprite(60,70);
 		this.effectSprite.setPosition(0,0);
-		this.addChild(this.effectSprite);
+		// this.addChild(this.effectSprite);
 	},
 	draw: function(){
 		// this._super();
@@ -82,15 +87,40 @@ var BaseSoldierSprite=cc.Sprite.extend({
         }
         this.x=this._position.x+30;
         this.y=this._position.y+28;
-        // this.SET_DIRTY_RECURSIVELY();
+        this.SET_DIRTY_RECURSIVELY();
 	},
 	getDamage: function(damage){
-		this.bloodSprite.getDamage(damage);
+		//调整血量
+		var damageDetail=this.bloodSprite.getDamage(damage);
+		console.log(damageDetail);
+		damage=damageDetail["damage"];
+		//显示动画
+		this.bloodChangeSprite.getDamage(damage);
+		this.bloodChangeSprite.setPosition(10,8+40+5);
+		this.addChild(this.bloodChangeSprite);
+		var actionMove=cc.MoveBy.create(1,new cc.Point(0,20));
+		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.bloodChangeSprite,this);
+		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
+		this.bloodChangeSprite.runAction(actionFinal);
 	},
 	getHeal: function(heal){
-		this.bloodSprite.getHeal(heal);
+		//调整血量
+		var healDetail=this.bloodSprite.getHeal(heal);
+		heal=healDetail["heal"];
+		//显示动画
+		this.bloodChangeSprite.getHeal(heal);
+		this.bloodChangeSprite.setPosition(10,8+40+5);
+		this.addChild(this.bloodChangeSprite);
+		var actionMove=cc.MoveBy.create(1,new cc.Point(0,20));
+		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.bloodChangeSprite,this);
+		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
+		this.bloodChangeSprite.runAction(actionFinal);
 	},
 	showTargetPosition: function(sprite){
 
+	},
+	removeSpriteCallback:function(sprite,parent){
+		cc.log("removeSprite");
+		parent.removeChild(sprite);
 	}
 });
