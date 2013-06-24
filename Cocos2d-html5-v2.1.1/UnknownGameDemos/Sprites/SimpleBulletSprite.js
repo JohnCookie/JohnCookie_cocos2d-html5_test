@@ -1,3 +1,4 @@
+// Éä³öµÄ×Óµ¯
 var SimpleBulletSprite = cc.Sprite.extend({
 	id:0,
 	radius:0,

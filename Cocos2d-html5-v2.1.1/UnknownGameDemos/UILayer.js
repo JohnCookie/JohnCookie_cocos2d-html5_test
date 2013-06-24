@@ -82,6 +82,7 @@ var UILayer=cc.Layer.extend({
 		if(cc.rectContainsPoint(this.cancelSkillBtn.getBoundingBox(),touchPoint)){
 			console.log("---Cancel Skill---");
 			this.resetSkillState();
+			this.getParent().mainLayer.teamArr1[0].targetBlink();
 		}
 		if(cc.rectContainsPoint(this.showSpriteBorderBtn.getBoundingBox(),touchPoint)){
 			console.log("---Border On/Off---");

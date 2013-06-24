@@ -4,6 +4,7 @@ var MainLayer=cc.Layer.extend({
 	arrowSprite: null,
 	tempTouchPoint: null,
 	activeSprite: null,
+	curr_activeSprite: null,
 	lastHurtedSprite: null,
 	status: 0, //0 normal 1 sprite being touched
 	__scaleBase: 50, 
@@ -17,14 +18,25 @@ var MainLayer=cc.Layer.extend({
 		this.schedule(this.update);
 	},
 	update: function(dt){
-		this.soldierStep();
-		this.checkBorderBounce();
-		this.checkCollision();
+		if(this.allSoldierMoveEnd()){
+			if(Game.gameStatus==Game.status.NORMAL && Game.targetShowed==false){
+				console.log("next round");
+				this.curr_activeSprite=this.getNextActiveSprite();
+				this.getParent().sightOnSoldier(this.curr_activeSprite);
+				this.curr_activeSprite.targetBlink();
+				Game.targetShowed=true;
+			}
+		}else{
+			this.soldierStep();
+			this.checkBorderBounce();
+			this.checkCollision();
+			Game.targetShowed=false;
+		}
 	},
 	onTouchesEnded: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
 		console.log("in MainLayer");
-		if(this.status==1){
+		if(this.status==1 && Game.gameStatus==Game.status.NORMAL){
 			//有精灵正被点击选中行动中
 			var realTouchPoint={};
 			realTouchPoint.x=touchPoint.x-Game.currWorldPoint.x;
@@ -61,6 +73,9 @@ var MainLayer=cc.Layer.extend({
 				case 3:
 					break;
 			}
+
+			this.activeSprite.resetAgility();
+			this.status=0;
 		}
 		
 	},
@@ -73,23 +88,25 @@ var MainLayer=cc.Layer.extend({
 		realTouchPoint.y=touchPoint.y-Game.currWorldPoint.y;
 		
 		this.tempTouchPoint=realTouchPoint;
+		if(this.status==0 && Game.gameStatus==Game.status.NORMAL){
+			// var touchedSprite=this.touchOnSoldier(realTouchPoint);
+			// if(touchedSprite!=null){
+			if(this.isTouchOnActiveSoldier(realTouchPoint,this.curr_activeSprite)){
+				console.log("Touched!");
+				this.status=1;
+				
+				this.activeSprite=this.curr_activeSprite;
 
-		var touchedSprite=this.touchOnSoldier(realTouchPoint);
-		if(touchedSprite!=null){
-			console.log("Touched!");
-			this.status=1;
-			
-			this.activeSprite=touchedSprite;
-
-			var spritePos=touchedSprite.getPosition();
-			this.arrowSprite.setPosition(spritePos.x+30,spritePos.y+28);
-			this.arrowSprite.setScaleY(1);
-			this.addChild(this.arrowSprite);
+				var spritePos=this.activeSprite.getPosition();
+				this.arrowSprite.setPosition(spritePos.x+30,spritePos.y+28);
+				this.arrowSprite.setScaleY(1);
+				this.addChild(this.arrowSprite);
+			}
 		}
 	},
 	onTouchesMoved: function(pTouch, pEvent){
 		var touchNowPoint=pTouch[0].getLocation();
-		if(this.status==1){
+		if(this.status==1 && Game.gameStatus==Game.status.NORMAL){
 			var realTouchNow={};
 			realTouchNow.x=touchNowPoint.x-Game.currWorldPoint.x;
 			realTouchNow.y=touchNowPoint.y-Game.currWorldPoint.y;
@@ -135,6 +152,18 @@ var MainLayer=cc.Layer.extend({
 			}
 		}
 		return currSprite;
+	},
+	isTouchOnActiveSoldier: function(realTouchPoint,soldier){
+		var rectPos=soldier.getPosition();
+		var rectX=rectPos.x+10;
+		var rectY=rectPos.y+8;
+		var rectW=40;
+		var rectH=40;
+		if(cc.rectContainsPoint(new cc.Rect(rectX,rectY,rectW,rectH),realTouchPoint)){
+			return true;
+		}else{
+			return false;
+		}
 	},
 	demoInitTeam: function(team1Num,team2Num){
 		this.teamArr1=new Array();
@@ -192,6 +221,11 @@ var MainLayer=cc.Layer.extend({
 		this.teamArr2.push(magic);
 		magic.setPosition(Game.mapWidth-250-fixValueX,Game.mapHeight-100-fixValueY);
 		this.addChild(magic);
+
+		if(this.getParent()){
+			this.getParent().showWholeMap();
+		}
+		
 	},
 	soldierStep: function(){
 		var factor=1;
@@ -228,6 +262,23 @@ var MainLayer=cc.Layer.extend({
 			this.teamArr2[i].y+=this.teamArr2[i].vy;
 			this.teamArr2[i].setPosition(this.teamArr2[i].x-30,this.teamArr2[i].y-28);
 		}
+	},
+	allSoldierMoveEnd: function(){
+		//是否都运动结束了 速度为0
+		var allEnd=true;
+		for(var i=0;i<this.teamArr1.length;i++){
+			if(this.teamArr1[i].vx!=0 || this.teamArr1[i].vy!=0){
+				allEnd=false;
+				break;
+			}
+		}
+		for(var i=0;i<this.teamArr2.length;i++){
+			if(this.teamArr2[i].vx!=0 || this.teamArr2[i].vy!=0){
+				allEnd=false;
+				break;
+			}
+		}
+		return allEnd;
 	},
 	checkCollision: function(){
 		if(this.activeSprite){
@@ -400,5 +451,30 @@ var MainLayer=cc.Layer.extend({
 		}else{
 			return {"x":(ball1.x+ball2.x)/2,"y":(ball1.y+ball2.y)/2,"collided":false};
 		}
+	},
+	resortByAgility: function(){
+		this.teamArr1=this.teamArr1.sortByKey("curr_agility");
+		this.teamArr2=this.teamArr2.sortByKey("curr_agility");
+	},
+	getNextActiveSprite: function(){
+		this.resortByAgility();
+		var nextActiveSprite=null;
+		var reduceValue=0;
+		console.log("T1",this.teamArr1);
+		console.log("T2",this.teamArr2);
+		if(this.teamArr1[0].curr_agility<=this.teamArr2[0].curr_agility){
+			nextActiveSprite=this.teamArr1[0];
+		}else{
+			nextActiveSprite=this.teamArr2[0];
+		}
+		reduceValue=nextActiveSprite.curr_agility;
+		// 所有都减去这个值
+		for(var i=0;i<this.teamArr1.length;i++){
+			this.teamArr1[i].reduceAgility(reduceValue);
+		}
+		for(var i=0;i<this.teamArr2.length;i++){
+			this.teamArr2[i].reduceAgility(reduceValue);
+		}
+		return nextActiveSprite;
 	}
 });

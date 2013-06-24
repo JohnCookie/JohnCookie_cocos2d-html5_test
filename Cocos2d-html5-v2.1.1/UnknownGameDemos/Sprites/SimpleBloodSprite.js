@@ -1,3 +1,4 @@
+// 血条
 var SimpleBloodSprite=cc.Sprite.extend({
 	width: 40,
 	blood: 100,

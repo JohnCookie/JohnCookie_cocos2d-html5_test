@@ -1,3 +1,4 @@
+// 弹射时显示的力量箭头
 var ArrowSprite = cc.Sprite.extend({
 	__rotate:0,
 	__length:0,

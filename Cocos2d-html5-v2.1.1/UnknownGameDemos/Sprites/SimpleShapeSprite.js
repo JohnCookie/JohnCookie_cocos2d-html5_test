@@ -1,3 +1,4 @@
+// 精灵显示主体
 var SimpleShapeSprite=cc.Sprite.extend({
 	type: 0,//1 近战 2 远程 3 魔法
 	team: 0,

@@ -1,3 +1,4 @@
+// 整个士兵元素
 var BaseSoldierSprite=cc.Sprite.extend({
 	type: 0, //1 近战 2 远程 3 魔法
 	x: 0,
@@ -5,6 +6,8 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	vx: 0,
 	vy: 0,
 	blood: 100,
+	agility: 0,
+	curr_agility:0,
 	mass: 0,
 	radius: 20,
 	buff: 0,
@@ -25,6 +28,8 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.blood=SoldierData[type]["blood"];
 		this.mass=SoldierData[type]["mass"];
 		this.radius=SoldierData[type]["radius"];
+		this.agility=SoldierData[type]["agility"];
+		this.curr_agility=SoldierData[type]["agility"];
 
 		this.setContentSize(new cc.Size(60,70));
 		// 精灵主体
@@ -49,6 +54,7 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.actionPointLabel.setPosition(50,8);
 		this.actionPointLabel.setColor(commonColor3B["blue"]);
 		this.addChild(this.actionPointLabel);
+		this.reduceAgility(0);
 
 		//目标框
 		this.effectSprite=new SimpleEffectSprite(60,70);
@@ -116,11 +122,27 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
 		this.bloodChangeSprite.runAction(actionFinal);
 	},
-	showTargetPosition: function(sprite){
-
+	reduceAgility: function(reduce){
+		if(this.curr_agility-reduce<0){
+			this.curr_agility=0;
+		}else{
+			this.curr_agility-=reduce;
+		}
+		this.actionPointLabel.setString(this.curr_agility);
 	},
 	removeSpriteCallback:function(sprite,parent){
 		cc.log("removeSprite");
 		parent.removeChild(sprite);
+	},
+	targetBlink: function(){
+		this.addChild(this.effectSprite);
+		var blinkAction = cc.Blink.create(2, 3);
+		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.effectSprite,this);
+		var actionFinal=cc.Sequence.create(blinkAction,actionCallback);
+		this.effectSprite.runAction(actionFinal);
+	},
+	resetAgility: function(){
+		this.curr_agility=this.agility;
+		this.actionPointLabel.setString(this.curr_agility);
 	}
 });

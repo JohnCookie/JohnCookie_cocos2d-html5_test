@@ -1,3 +1,4 @@
+// 血量变化精灵
 var SimpleHPSprite=cc.Sprite.extend({
 	width: 40,
 	height: 10,

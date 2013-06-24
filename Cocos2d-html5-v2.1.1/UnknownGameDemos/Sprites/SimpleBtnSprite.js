@@ -1,3 +1,4 @@
+// 按钮类
 var SimpleBtnSprite=cc.Sprite.extend({
 	state:0, //0 未激活状态 1 激活状态 用于显示
 	layerColor:null, //底色层
