@@ -1,4 +1,4 @@
-// 弹射时显示的力量箭头
+// 寮瑰皠鏃舵樉绀虹殑鍔涢噺绠ご
 var ArrowSprite = cc.Sprite.extend({
 	__rotate:0,
 	__length:0,

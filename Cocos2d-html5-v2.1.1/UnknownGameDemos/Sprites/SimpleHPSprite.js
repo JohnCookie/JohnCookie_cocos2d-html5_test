@@ -1,4 +1,4 @@
-// ÑªÁ¿±ä»¯¾«Áé
+// è¡€é‡å˜åŒ–ç²¾çµ
 var SimpleHPSprite=cc.Sprite.extend({
 	width: 40,
 	height: 10,

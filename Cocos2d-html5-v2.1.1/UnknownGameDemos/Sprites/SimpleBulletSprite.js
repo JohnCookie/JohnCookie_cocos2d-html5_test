@@ -1,4 +1,4 @@
-// …‰≥ˆµƒ◊”µØ
+// Â∞ÑÂá∫ÁöÑÂ≠êÂºπ
 var SimpleBulletSprite = cc.Sprite.extend({
 	id:0,
 	radius:0,
@@ -13,6 +13,8 @@ var SimpleBulletSprite = cc.Sprite.extend({
 	ctor:function(x, y, color){
 		this._super();
 
+		this.setContentSize(10,10);
+
 		this.x=x;
 		this.y=y;
 		this.color=color;
@@ -26,7 +28,10 @@ var SimpleBulletSprite = cc.Sprite.extend({
 		cc.renderContext.fillStyle = "rgba("+r+","+g+","+b+","+a+")";
 		cc.renderContext.lineWidth=5;
         cc.renderContext.strokeStyle = "rgba("+r+","+g+","+b+","+a+")";
-        cc.drawingUtil.drawCircle(cc.p(this.x+Game.currWorldPoint.x, this.y+Game.currWorldPoint.y), 5, 0, 60, false);
+
+        var size=this.getContentSize();
+
+        cc.drawingUtil.drawCircle(cc.p(size.width/2, size.height/2), 5, 0, 60, false);
 	},
 	update:function(dt){
 		// The drawing method don't work in update() method
@@ -34,10 +39,8 @@ var SimpleBulletSprite = cc.Sprite.extend({
 		// cc.renderContext.strokeStyle = "rgba(0,255,0,1)";
 		// cc.drawingUtil.drawCircle(cc.p(this.x, this.y), 100, this.radius, 10, true);
 	},
-	getPosition: function(){
-		var pos={};
-		pos.x=this.x;
-		pos.y=this.y;
+	getBulletPosition: function(){
+		var pos=this.getPosition();
 		return pos;
 	}
 });

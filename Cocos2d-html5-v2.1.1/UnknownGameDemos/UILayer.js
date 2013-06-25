@@ -74,15 +74,16 @@ var UILayer=cc.Layer.extend({
 		if(cc.rectContainsPoint(this.skillBtn1.getBoundingBox(),touchPoint)){
 			console.log("---Skill 1---");
 			this.skillBtn1.setBgColor(new cc.Color4B(255,100,10,200));
+			this.skillBtn1.status=1;
 		}
 		if(cc.rectContainsPoint(this.skillBtn2.getBoundingBox(),touchPoint)){
 			console.log("---Skill 2---");
 			this.skillBtn2.setBgColor(new cc.Color4B(255,100,10,200));
+			this.skillBtn2.status=1;
 		}
 		if(cc.rectContainsPoint(this.cancelSkillBtn.getBoundingBox(),touchPoint)){
 			console.log("---Cancel Skill---");
 			this.resetSkillState();
-			this.getParent().mainLayer.teamArr1[0].targetBlink();
 		}
 		if(cc.rectContainsPoint(this.showSpriteBorderBtn.getBoundingBox(),touchPoint)){
 			console.log("---Border On/Off---");
@@ -102,5 +103,7 @@ var UILayer=cc.Layer.extend({
 	resetSkillState: function(){
 		this.skillBtn1.setBgColor(new cc.Color4B(200,200,0,130));
 		this.skillBtn2.setBgColor(new cc.Color4B(200,200,0,130));
+		this.skillBtn1.status=0;
+		this.skillBtn2.status=0;
 	}
 });

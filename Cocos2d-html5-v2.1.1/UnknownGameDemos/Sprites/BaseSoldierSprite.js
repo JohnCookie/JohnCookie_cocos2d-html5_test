@@ -95,6 +95,12 @@ var BaseSoldierSprite=cc.Sprite.extend({
         this.y=this._position.y+28;
         this.SET_DIRTY_RECURSIVELY();
 	},
+	getCenterPosition: function(){
+		var pos=this.getPosition();
+		var size=this.getContentSize();
+		var center=new cc.Point(pos.x+size.width/2,pos.y+size.height/2);
+		return center;
+	},
 	getDamage: function(damage){
 		//调整血量
 		var damageDetail=this.bloodSprite.getDamage(damage);

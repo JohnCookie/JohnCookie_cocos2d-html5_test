@@ -108,11 +108,7 @@ var GameLayer=cc.Layer.extend({
 		this.mainLayer.curr_activeSprite.targetBlink();
 	},
 	sightOnSoldier: function(soldier){
-		var pos=soldier.getPosition();
-		console.log("pos",pos);
-		var size=soldier.getContentSize();
-		console.log("size",size)
-		var center=new cc.Point(pos.x+size.width/2,pos.y+size.height/2);
+		var center=soldier.getCenterPosition();
 
 		if(center.x<Game.width/2){
 			center.x=0;
@@ -132,7 +128,7 @@ var GameLayer=cc.Layer.extend({
 
 		center.x=-center.x;
 		center.y=-center.y;
-		console.log("center",center);
+
 		this.mainLayer.setPosition(center);
 		this.mapLayer.setPosition(center);
 
@@ -147,6 +143,6 @@ var GameScene = cc.Scene.extend({
 		layer.init();
 		this.addChild(layer);
 
-		layer.showWholeMap();
+		// layer.showWholeMap();
 	}
 });

@@ -1,6 +1,7 @@
 var MainLayer=cc.Layer.extend({
 	teamArr1:null,
 	teamArr2:null,
+	bulletArr:new Array(),
 	arrowSprite: null,
 	tempTouchPoint: null,
 	activeSprite: null,
@@ -18,18 +19,22 @@ var MainLayer=cc.Layer.extend({
 		this.schedule(this.update);
 	},
 	update: function(dt){
-		if(this.allSoldierMoveEnd()){
+		if(this.allSoldierMoveEnd() && this.bulletArr.length<=0){
 			if(Game.gameStatus==Game.status.NORMAL && Game.targetShowed==false){
 				console.log("next round");
 				this.curr_activeSprite=this.getNextActiveSprite();
 				this.getParent().sightOnSoldier(this.curr_activeSprite);
 				this.curr_activeSprite.targetBlink();
+				this.lastHurtedSprite=null;
 				Game.targetShowed=true;
 			}
 		}else{
-			this.soldierStep();
-			this.checkBorderBounce();
-			this.checkCollision();
+			this.soldierStep(); // 士兵移动
+			this.bulletStep(); // 子弹移动
+			this.checkBulletCollision(); // 子弹检测
+			this.checkBorderBounce(); // 边缘碰撞检测
+			this.checkCollision(); // 士兵碰撞检测
+			
 			Game.targetShowed=false;
 		}
 	},
@@ -63,16 +68,18 @@ var MainLayer=cc.Layer.extend({
 			//精灵移动
 			this.activeSprite.vx=arrowScale*4*Math.sin(angle);
 			this.activeSprite.vy=arrowScale*4*Math.cos(angle);
-			angle = angle*(180/Math.PI);
-			this.activeSprite.mainSprite.setRotation(angle);
-			switch(SoldierData[this.activeSprite.type]["type"]){
-				case 1:
-					break;
-				case 2:
-					break;
-				case 3:
-					break;
-			}
+			angle1 = angle*(180/Math.PI);
+			this.activeSprite.mainSprite.setRotation(angle1);
+
+			// switch(SoldierData[this.activeSprite.type]["type"]){
+			// 	case 1:
+			// 		break;
+			// 	case 2:
+			// 		break;
+			// 	case 3:
+			// 		break;
+			// }
+			this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
 
 			this.activeSprite.resetAgility();
 			this.status=0;
@@ -460,8 +467,6 @@ var MainLayer=cc.Layer.extend({
 		this.resortByAgility();
 		var nextActiveSprite=null;
 		var reduceValue=0;
-		console.log("T1",this.teamArr1);
-		console.log("T2",this.teamArr2);
 		if(this.teamArr1[0].curr_agility<=this.teamArr2[0].curr_agility){
 			nextActiveSprite=this.teamArr1[0];
 		}else{
@@ -476,5 +481,100 @@ var MainLayer=cc.Layer.extend({
 			this.teamArr2[i].reduceAgility(reduceValue);
 		}
 		return nextActiveSprite;
+	},
+	soldierAttackAction: function(soldier,angle){
+		var center=soldier.getCenterPosition();
+		console.log("bullet start pos:",center);
+		console.log("soldertype:",SoldierData[soldier.type]["type"]);
+		switch(SoldierData[soldier.type]["type"]){
+			case 1:
+				console.log("Melee action");
+				break;
+			case 2:
+				console.log("Ranged action");
+				var bullet=new SimpleBulletSprite(center.x,center.y,commonColor4B["black"]);
+				bullet.setPosition(center.x,center.y);
+				console.log("soldier pos:",soldier.getPosition());
+				console.log(center);
+				bullet.vx=Math.sin(angle)*10;
+				bullet.vy=Math.cos(angle)*10;
+				var bid=this.bulletArr.length;
+				bullet.id=bid;
+				this.bulletArr.push(bullet);
+				
+				this.addChild(bullet);
+				break;
+			case 3:
+				console.log("Magic action");
+				var bullet=new SimpleBulletSprite(center.x,center.y,commonColor4B["green"]);
+				bullet.setPosition(center.x,center.y);
+				bullet.vx=Math.sin(angle)*10;
+				bullet.vy=Math.cos(angle)*10;
+				var bid=this.bulletArr.length;
+				bullet.id=bid;
+				this.bulletArr.push(bullet);
+				
+				this.addChild(bullet);
+				break;
+		}
+	},
+	bulletStep: function(){
+		for(var k=0;k<this.bulletArr.length;k++){
+			this.bulletArr[k].x+=this.bulletArr[k].vx;
+			this.bulletArr[k].y+=this.bulletArr[k].vy;
+			this.bulletArr[k].setPosition(this.bulletArr[k].x,this.bulletArr[k].y);
+		}
+	},
+	checkBulletCollision: function(){
+		if(this.activeSprite.team==0){
+			//检查和2队的碰撞
+			for(var i=0;i<this.bulletArr.length;i++){
+				for(var j=0;j<this.teamArr2.length;j++){
+					this.bulletCollision(this.bulletArr[i],this.teamArr2[j]);
+				}
+			}
+		}
+		if(this.activeSprite.team==1){
+			//检查和1队的碰撞
+			for(var i=0;i<this.bulletArr.length;i++){
+				for(var j=0;j<this.teamArr1.length;j++){
+					this.bulletCollision(this.bulletArr[i],this.teamArr1[j]);
+				}
+			}
+		}
+	},
+	bulletCollision: function(bullet,ball){
+		if(bullet && ball){
+			var dx=ball.x-bullet.x;
+			var dy=ball.y-bullet.y;
+			var dist=Math.sqrt(dx*dx+dy*dy);
+
+			var bulletPos=bullet.getBulletPosition();
+			if(dist<=ball.radius){
+				//shoot on target
+				// var tpos={"x":bullet.x,"y":bullet.y};
+				// this.showCollision(tpos);
+				// ball.reduceBlood(10);
+
+				ball.getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[ball.type]["def"]);
+				this.removeBullet(bullet);
+			}
+			// console.log(bulletPos);
+			if(bulletPos.x<0 || bulletPos.x>Game.mapWidth || bulletPos.y<0 || bulletPos.y>Game.mapHeight){
+				this.removeBullet(bullet);
+			}
+		}
+	},
+	removeBullet: function(bullet){
+		//删除子弹 1 找到id 删掉数组中该id的bullet 并且其他所有处于他之后的bullet id都-1
+		var bid=bullet.id;
+		this.bulletArr=this.bulletArr.del(bid);
+		if(bid<this.bulletArr.length && bid!=0){
+			for(var a=bid;a<this.bulletArr.length;a++){
+				this.bulletArr[a].id-=1;
+			}
+		}
+		this.removeChild(bullet);
+		console.log("removeBullet!!!");
 	}
 });
