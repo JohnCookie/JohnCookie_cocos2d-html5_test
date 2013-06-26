@@ -11,16 +11,19 @@ var GameLayer=cc.Layer.extend({
 		// UI层
 		this.uiLayer = new UILayer();
 		this.uiLayer.init();
+		this.uiLayer.setPosition(0,0);
 		this.addChild(this.uiLayer,3,3);
 
 		// 游戏主要的精灵层
 		this.mainLayer = new MainLayer();
 		this.mainLayer.init();
+		this.mainLayer.setPosition(0,0);
 		this.addChild(this.mainLayer,1,1);
 
 		// 地图底层
 		this.mapLayer = new MapLayer();
 		this.mapLayer.init();
+		this.mapLayer.setPosition(0,0);
 		this.addChild(this.mapLayer,0,0);
 
 		this.currWorldPoint=new cc.Point(0,0);
@@ -143,6 +146,6 @@ var GameScene = cc.Scene.extend({
 		layer.init();
 		this.addChild(layer);
 
-		// layer.showWholeMap();
+		layer.showWholeMap();
 	}
 });

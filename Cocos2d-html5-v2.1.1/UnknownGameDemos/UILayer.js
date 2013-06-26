@@ -48,6 +48,7 @@ var UILayer=cc.Layer.extend({
 		};
 		this.teamStatusLabel.setTeamBNum=function(num){
 			var tempStr=this.getString();
+			var index=tempStr.indexOf(":");
 			this.setString(tempStr.substring(0,index+3)+num+tempStr.substring(index+4));
 		};
 
@@ -105,5 +106,9 @@ var UILayer=cc.Layer.extend({
 		this.skillBtn2.setBgColor(new cc.Color4B(200,200,0,130));
 		this.skillBtn1.status=0;
 		this.skillBtn2.status=0;
+	},
+	refreshTeamStatus: function(numA,numB){
+		this.teamStatusLabel.setTeamANum(numA);
+		this.teamStatusLabel.setTeamBNum(numB);
 	}
 });

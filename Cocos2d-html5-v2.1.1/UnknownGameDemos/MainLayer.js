@@ -173,6 +173,24 @@ var MainLayer=cc.Layer.extend({
 		}
 	},
 	demoInitTeam: function(team1Num,team2Num){
+		this.removeAllChildren();
+		Game.currWorldPoint=new cc.Point(0,0);
+		Game.showSpriteBorder=false;
+		Game.showSpriteCollisionBorder=false;
+		Game.targetShowed=false;
+		Game.gameStatus=0;
+		if(this.getParent()){
+			if(this.getParent().uiLayer){
+				this.getParent().uiLayer.setPosition(0,0);
+			}
+			if(this.getParent().mainLayer){
+				this.getParent().mainLayer.setPosition(0,0);
+			}
+			if(this.getParent().mapLayer){
+				this.getParent().mapLayer.setPosition(0,0);
+			}
+		}
+
 		this.teamArr1=new Array();
 		this.teamArr2=new Array();
 
@@ -369,95 +387,98 @@ var MainLayer=cc.Layer.extend({
 		}
 	},
 	ballCollision: function(ball1,ball2){
-		//Calculate the distance between 2 ball
-		// var dist=ball1.x-ball2.x; //on x-axis
-		var dx=ball2.x-ball1.x;
-		var dy=ball2.y-ball1.y;
-		var dist=Math.sqrt(dx*dx+dy*dy);
+		if(ball1 && ball2){
+			//Calculate the distance between 2 ball
+			// var dist=ball1.x-ball2.x; //on x-axis
+			var dx=ball2.x-ball1.x;
+			var dy=ball2.y-ball1.y;
+			var dist=Math.sqrt(dx*dx+dy*dy);
 
-		//if 2 balls crashed
-		if(Math.abs(dist)<ball1.radius+ball2.radius){
-			// on x-axis
-			/*
-			// v0final=((m0-m1)v0+2m1v1)/(m0+m1)
-			// v1final=v0final+(v0-v1)
-			var vdx=ball1.vx-ball2.vx;
-			var v1final=((ball1.mass-ball2.mass)*ball1.vx+2*ball2.mass*ball2.vx)/(ball1.mass+ball2.mass);
-			var v2final=v1final+vdx;
+			//if 2 balls crashed
+			if(Math.abs(dist)<ball1.radius+ball2.radius){
+				// on x-axis
+				/*
+				// v0final=((m0-m1)v0+2m1v1)/(m0+m1)
+				// v1final=v0final+(v0-v1)
+				var vdx=ball1.vx-ball2.vx;
+				var v1final=((ball1.mass-ball2.mass)*ball1.vx+2*ball2.mass*ball2.vx)/(ball1.mass+ball2.mass);
+				var v2final=v1final+vdx;
 
-			ball1.vx=v1final;
-			ball2.vx=v2final;
-			console.log("v1x",ball1.vx);
-			console.log("v2x",ball2.vx);
+				ball1.vx=v1final;
+				ball2.vx=v2final;
+				console.log("v1x",ball1.vx);
+				console.log("v2x",ball2.vx);
 
-			ball1.x+=ball1.vx;
-			ball2.x+=ball2.vx;
-			*/
+				ball1.x+=ball1.vx;
+				ball2.x+=ball2.vx;
+				*/
 
-			// on both x-axis and y-axis
-			var angle=Math.atan2(dy,dx);
-			var cos=Math.cos(angle);
-			var sin=Math.sin(angle);
+				// on both x-axis and y-axis
+				var angle=Math.atan2(dy,dx);
+				var cos=Math.cos(angle);
+				var sin=Math.sin(angle);
 
-			// rotate by the center of ball1
-			var x1=0;
-			var y1=0;
+				// rotate by the center of ball1
+				var x1=0;
+				var y1=0;
 
-			var x2=dx*cos+dy*sin;
-			var y2=dy*cos-dx*sin;
+				var x2=dx*cos+dy*sin;
+				var y2=dy*cos-dx*sin;
 
-			//the speed after rotate
-			var vx1=ball1.vx*cos+ball1.vy*sin;
-			var vy1=ball1.vy*cos-ball1.vx*sin;
-			var vx2=ball2.vx*cos+ball2.vy*sin;
-			var vy2=ball2.vy*cos-ball2.vx*sin;
+				//the speed after rotate
+				var vx1=ball1.vx*cos+ball1.vy*sin;
+				var vy1=ball1.vy*cos-ball1.vx*sin;
+				var vx2=ball2.vx*cos+ball2.vy*sin;
+				var vy2=ball2.vy*cos-ball2.vx*sin;
 
-			// v0final=((m0-m1)v0+2m1v1)/(m0+m1)
-			// v1final=v0final+(v0-v1)
-			var vdx=vx1-vx2;
-			var vx1final=((ball1.mass-ball2.mass)*vx1+2*ball2.mass*vx2)/(ball1.mass+ball2.mass);
-			var vx2final=vx1final+vdx;
+				// v0final=((m0-m1)v0+2m1v1)/(m0+m1)
+				// v1final=v0final+(v0-v1)
+				var vdx=vx1-vx2;
+				var vx1final=((ball1.mass-ball2.mass)*vx1+2*ball2.mass*vx2)/(ball1.mass+ball2.mass);
+				var vx2final=vx1final+vdx;
 
-			// the new position
-			// x1+=vx1final;
-			// x2+=vx2final;
-			var sumRadius=ball1.radius+ball2.radius;
-			var overlap=sumRadius-Math.abs(x1-x2);
-			
-			var radio1=ball1.radius/sumRadius;
-			var radio2=ball2.radius/sumRadius;
+				// the new position
+				// x1+=vx1final;
+				// x2+=vx2final;
+				var sumRadius=ball1.radius+ball2.radius;
+				var overlap=sumRadius-Math.abs(x1-x2);
+				
+				var radio1=ball1.radius/sumRadius;
+				var radio2=ball2.radius/sumRadius;
 
-			if(overlap>0){
-				if(x1>x2){
-					x1+=overlap*radio1;
-					x2-=overlap*radio2;
-				}else{
-					x1-=overlap*radio1;
-					x2+=overlap*radio2;
+				if(overlap>0){
+					if(x1>x2){
+						x1+=overlap*radio1;
+						x2-=overlap*radio2;
+					}else{
+						x1-=overlap*radio1;
+						x2+=overlap*radio2;
+					}
 				}
+
+				//rotate back
+				var x1final=x1*cos-y1*sin;
+				var y1final=y1*cos+x1*sin;
+				var x2final=x2*cos-y2*sin;
+				var y2final=y2*cos+x2*sin;
+
+				ball2.x=ball1.x+x2final;
+				ball2.y=ball1.y+y2final;
+				ball1.x+=x1final;
+				ball1.y+=y1final;
+				
+				//final speed
+				ball1.vx=vx1final*cos-vy1*sin;
+				ball1.vy=vy1*cos+vx1final*sin;
+				ball2.vx=vx2final*cos-vy2*sin;
+				ball2.vy=vy2*cos+vx2final*sin;
+
+				return {"x":(ball1.x+ball2.x)/2,"y":(ball1.y+ball2.y)/2,"collided":true};
+			}else{
+				return {"x":(ball1.x+ball2.x)/2,"y":(ball1.y+ball2.y)/2,"collided":false};
 			}
-
-			//rotate back
-			var x1final=x1*cos-y1*sin;
-			var y1final=y1*cos+x1*sin;
-			var x2final=x2*cos-y2*sin;
-			var y2final=y2*cos+x2*sin;
-
-			ball2.x=ball1.x+x2final;
-			ball2.y=ball1.y+y2final;
-			ball1.x+=x1final;
-			ball1.y+=y1final;
-			
-			//final speed
-			ball1.vx=vx1final*cos-vy1*sin;
-			ball1.vy=vy1*cos+vx1final*sin;
-			ball2.vx=vx2final*cos-vy2*sin;
-			ball2.vy=vy2*cos+vx2final*sin;
-
-			return {"x":(ball1.x+ball2.x)/2,"y":(ball1.y+ball2.y)/2,"collided":true};
-		}else{
-			return {"x":(ball1.x+ball2.x)/2,"y":(ball1.y+ball2.y)/2,"collided":false};
 		}
+		return {"x":0,"y":0,"collided":false};
 	},
 	resortByAgility: function(){
 		this.teamArr1=this.teamArr1.sortByKey("curr_agility");
@@ -576,5 +597,16 @@ var MainLayer=cc.Layer.extend({
 		}
 		this.removeChild(bullet);
 		console.log("removeBullet!!!");
+	},
+	dieSoldier: function(soldier){
+		this.removeChild(soldier);
+		if(soldier.team==0){
+			//从1队删除
+			this.teamArr1.remove(soldier);
+		}
+		if(soldier.team==1){
+			this.teamArr2.remove(soldier);
+		}
+		this.getParent().uiLayer.refreshTeamStatus(this.teamArr1.length,this.teamArr2.length);
 	}
 });

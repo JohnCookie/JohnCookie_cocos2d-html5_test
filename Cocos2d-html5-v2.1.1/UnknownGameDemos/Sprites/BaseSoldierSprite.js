@@ -114,6 +114,11 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.bloodChangeSprite,this);
 		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
 		this.bloodChangeSprite.runAction(actionFinal);
+		console.log(damageDetail);
+		if(damageDetail["die"]==1){
+			console.log("---Soldier Die---");
+			this.getParent().dieSoldier(this);
+		}
 	},
 	getHeal: function(heal){
 		//调整血量

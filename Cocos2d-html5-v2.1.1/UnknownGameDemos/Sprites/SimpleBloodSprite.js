@@ -29,14 +29,16 @@ var SimpleBloodSprite=cc.Sprite.extend({
 
 	},
 	getDamage: function(damage){
-		if(this.curr_blood<damage){
+		var die=0;
+		if(this.curr_blood<=damage){
 			//被干死了
 			damage=this.curr_blood;
 			this.curr_blood=0;
+			die=1;
 		}else{
 			this.curr_blood-=damage;
 		}
-		return {"curr_blood":this.curr_blood,"damage":damage};
+		return {"curr_blood":this.curr_blood,"damage":damage,"die":die};
 	},
 	getHeal: function(heal){
 		if(this.curr_blood+heal>this.blood){
