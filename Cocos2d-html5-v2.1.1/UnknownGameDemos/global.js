@@ -9,6 +9,7 @@ Game.showSpriteCollisionBorder=false;
 Game.targetShowed=false;
 // 游戏状态标示
 Game.gameStatus=0;
+Game.underSkill=0; //处于某一技能状态下
 Game.status={};
 Game.status.NORMAL=0; // 正常状态(可以点击按钮 使用技能 弹射士兵的状态)
 Game.status.ANIM_ON=1; // 播放动画状态

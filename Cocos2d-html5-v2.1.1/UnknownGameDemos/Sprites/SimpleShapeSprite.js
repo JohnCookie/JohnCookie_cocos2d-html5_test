@@ -12,7 +12,9 @@ var SimpleShapeSprite=cc.Sprite.extend({
 		this.type=type;
 		this.team=team;
 
-		this.initWithFile("Sprites/spriteRes/hero.png");
+		var url=SoldierData[type]["img"];
+		this.initWithFile(url);
+		// this.initWithFile("Sprites/spriteRes/hero.png");
 
 		var size=this.getContentSize();
 		this.scale=this.width/size.width;

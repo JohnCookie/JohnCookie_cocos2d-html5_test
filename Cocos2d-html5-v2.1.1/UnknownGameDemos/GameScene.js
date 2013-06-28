@@ -146,6 +146,6 @@ var GameScene = cc.Scene.extend({
 		layer.init();
 		this.addChild(layer);
 
-		layer.showWholeMap();
+		// layer.showWholeMap();
 	}
 });

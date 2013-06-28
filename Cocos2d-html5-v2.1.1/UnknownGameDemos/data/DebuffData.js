@@ -1,3 +1,7 @@
-var DebuffData={
+var AtkDebuffData={
+	
+}
+
+var DefDebuffData={
 	
 }

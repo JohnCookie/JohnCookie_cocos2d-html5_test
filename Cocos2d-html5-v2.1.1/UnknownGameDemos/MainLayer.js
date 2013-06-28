@@ -19,14 +19,18 @@ var MainLayer=cc.Layer.extend({
 		this.schedule(this.update);
 	},
 	update: function(dt){
-		if(this.allSoldierMoveEnd() && this.bulletArr.length<=0){
-			if(Game.gameStatus==Game.status.NORMAL && Game.targetShowed==false){
+		if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0){
+			if(Game.targetShowed==false){
 				console.log("next round");
+				// 控制buff时间
+				this.reduceBuffDebuffTime();
+				// 取下一个行动的士兵
 				this.curr_activeSprite=this.getNextActiveSprite();
 				this.getParent().sightOnSoldier(this.curr_activeSprite);
 				this.curr_activeSprite.targetBlink();
 				this.lastHurtedSprite=null;
-				Game.targetShowed=true;
+
+				this.clearAuxiliary(); // 清除辅助变量 例如标示处于何种全局buff影响下等
 			}
 		}else{
 			this.soldierStep(); // 士兵移动
@@ -71,17 +75,25 @@ var MainLayer=cc.Layer.extend({
 			angle1 = angle*(180/Math.PI);
 			this.activeSprite.mainSprite.setRotation(angle1);
 
-			// switch(SoldierData[this.activeSprite.type]["type"]){
-			// 	case 1:
-			// 		break;
-			// 	case 2:
-			// 		break;
-			// 	case 3:
-			// 		break;
-			// }
-			this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
+			// 使用技能
+			var skillUsed=this.getParent().uiLayer.getSkillUsed();
+
+			if(skillUsed>0){
+				var skillId=SoldierData[this.activeSprite.type]["skill"+skillUsed];
+				this.activeSprite.showSkillName(skillId);
+
+				this.soldierUseSkill(this.activeSprite,angle);
+				if(SkillData[SoldierData[this.activeSprite.type]["skill"+skillUsed]]["type"]==1){
+					//如果是激活的buff类技能 那么只是赋予状态 常规工作仍要继续完成
+					this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
+				}
+			}else{
+				this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
+			}
 
 			this.activeSprite.resetAgility();
+
+			this.getParent().uiLayer.resetSkillState();
 			this.status=0;
 		}
 		
@@ -315,10 +327,12 @@ var MainLayer=cc.Layer.extend({
 						//2队行动 并且产生了碰撞
 						if(this.teamArr1[i]!=this.lastHurtedSprite){
 							//同一个不会在一次碰撞中连续受到伤害
-							this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
+							// this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
+							this.makeDamageWithBuff(this.teamArr1[i]);
 						}
 						if(this.teamArr1[j]!=this.lastHurtedSprite){
-							this.teamArr1[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[j].type]["def"]);
+							// this.teamArr1[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[j].type]["def"]);
+							this.makeDamageWithBuff(this.teamArr1[j]);
 						}
 					}
 				}
@@ -329,10 +343,12 @@ var MainLayer=cc.Layer.extend({
 					if(this.activeSprite.team==0 && collided["collided"]){
 						if(this.teamArr2[i]!=this.lastHurtedSprite){
 							//同一个不会在一次碰撞中连续受到伤害
-							this.teamArr2[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[i].type]["def"]);
+							// this.teamArr2[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[i].type]["def"]);
+							this.makeDamageWithBuff(this.teamArr2[i]);
 						}
 						if(this.teamArr2[j]!=this.lastHurtedSprite){
-							this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
+							// this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
+							this.makeDamageWithBuff(this.teamArr2[j]);
 						}
 					}
 				}
@@ -345,12 +361,14 @@ var MainLayer=cc.Layer.extend({
 						//敌对有碰撞
 						if(this.activeSprite.team==0){
 							//1队行动 2队受伤
-							this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
+							// this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
+							this.makeDamageWithBuff(this.teamArr2[j]);
 							this.lastHurtedSprite=this.teamArr2[j];
 						}
 						if(this.activeSprite.team==1){
 							//2队行动 1队受伤
-							this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
+							// this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
+							this.makeDamageWithBuff(this.teamArr1[i]);
 							this.lastHurtedSprite=this.teamArr1[i];
 						}
 					}
@@ -539,6 +557,30 @@ var MainLayer=cc.Layer.extend({
 				break;
 		}
 	},
+	soldierUseSkill: function(soldier,angle){
+		var skillUsed=this.getParent().uiLayer.getSkillUsed();
+		console.log("use skill:",skillUsed);
+		var skillId=SoldierData[soldier.type]["skill"+skillUsed];
+		console.log(skillId);
+		switch(SkillData[skillId]["type"]){
+			case 1:
+				// 自身增益型buff/debuff
+				soldier.atk_buff=SkillData[skillId]["atk_buff"];
+				soldier.atk_buff_time=SkillData[skillId]["atk_buff_time"];
+				soldier.atk_debuff=SkillData[skillId]["atk_debuff"];
+				soldier.atk_debuff_time=SkillData[skillId]["atk_debuff_time"];
+				
+				soldier.def_buff=SkillData[skillId]["def_buff"];
+				soldier.def_buff_time=SkillData[skillId]["def_buff_time"];
+				soldier.def_debuff=SkillData[skillId]["def_debuff"];
+				soldier.def_debuff_time=SkillData[skillId]["def_debuff_time"];
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+		}
+	},
 	bulletStep: function(){
 		for(var k=0;k<this.bulletArr.length;k++){
 			this.bulletArr[k].x+=this.bulletArr[k].vx;
@@ -547,19 +589,21 @@ var MainLayer=cc.Layer.extend({
 		}
 	},
 	checkBulletCollision: function(){
-		if(this.activeSprite.team==0){
-			//检查和2队的碰撞
-			for(var i=0;i<this.bulletArr.length;i++){
-				for(var j=0;j<this.teamArr2.length;j++){
-					this.bulletCollision(this.bulletArr[i],this.teamArr2[j]);
+		if(this.activeSprite){
+			if(this.activeSprite.team==0){
+				//检查和2队的碰撞
+				for(var i=0;i<this.bulletArr.length;i++){
+					for(var j=0;j<this.teamArr2.length;j++){
+						this.bulletCollision(this.bulletArr[i],this.teamArr2[j]);
+					}
 				}
 			}
-		}
-		if(this.activeSprite.team==1){
-			//检查和1队的碰撞
-			for(var i=0;i<this.bulletArr.length;i++){
-				for(var j=0;j<this.teamArr1.length;j++){
-					this.bulletCollision(this.bulletArr[i],this.teamArr1[j]);
+			if(this.activeSprite.team==1){
+				//检查和1队的碰撞
+				for(var i=0;i<this.bulletArr.length;i++){
+					for(var j=0;j<this.teamArr1.length;j++){
+						this.bulletCollision(this.bulletArr[i],this.teamArr1[j]);
+					}
 				}
 			}
 		}
@@ -577,7 +621,9 @@ var MainLayer=cc.Layer.extend({
 				// this.showCollision(tpos);
 				// ball.reduceBlood(10);
 
-				ball.getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[ball.type]["def"]);
+				// 攻防
+				this.makeDamageWithBuff(ball);
+				
 				this.removeBullet(bullet);
 			}
 			// console.log(bulletPos);
@@ -608,5 +654,80 @@ var MainLayer=cc.Layer.extend({
 			this.teamArr2.remove(soldier);
 		}
 		this.getParent().uiLayer.refreshTeamStatus(this.teamArr1.length,this.teamArr2.length);
+	},
+	clearAuxiliary: function(){
+		Game.underSkill=0;
+	},
+	makeDamageWithBuff: function(defSoldier){
+		// 攻防
+		var attack=SoldierData[this.activeSprite.type]["atk"];
+		var defence=SoldierData[defSoldier.type]["def"];
+		console.log("士兵基础攻击atk:",attack);
+		console.log("士兵基础防御def:",defence);
+		if(this.activeSprite.atk_buff>0 && this.activeSprite.atk_buff_time>0){
+			// 有攻击buff
+			var atk_ratio=AtkBuffData[this.activeSprite.atk_buff]["value"];
+			console.log("攻击 buff",atk_ratio);
+			if(AtkBuffData[this.activeSprite.atk_buff]["type"]==1){
+				//百分比加成
+				attack=Math.floor(attack*atk_ratio);
+			}else if(AtkBuffData[this.activeSprite.atk_buff]["type"]==2){
+				//固定值加成
+				attack=attack+atk_ratio;
+			}else{
+				attack=attack;
+			}
+		}
+		if(this.activeSprite.atk_debuff>0 && this.activeSprite.atk_debuff_time>0){
+			// 有攻击buff
+			var atk_ratio=AtkDebuffData[this.activeSprite.atk_debuff]["value"];
+			console.log("攻击 debuff",atk_ratio);
+			if(AtkDebuffData[this.activeSprite.atk_debuff]["type"]==1){
+				//百分比加成
+				attack=Math.floor(attack*atk_ratio);
+			}else if(AtkDebuffData[this.activeSprite.atk_debuff]["type"]==2){
+				//固定值加成
+				attack=attack-atk_ratio;
+			}else{
+				attack=attack;
+			}
+		}
+		if(defSoldier.def_buff>0 && defSoldier.def_buff_time>0){
+			// 有防御buff
+			var def_ratio=DefBuffData[defSoldier.def_buff]["value"];
+			console.log("防御 buff",def_ratio);
+			if(DefBuffData[defSoldier.def_buff]["type"]==1){
+				// 百分比防御加成
+				defence=Math.floor(defence*def_ratio);
+			}else if(DefBuffData[defSoldier.def_buff]["type"]==2){
+				// 固定值加成
+				defence=defence+def_ratio;
+			}else{
+				defence=defence;
+			}
+		}
+		if(defSoldier.def_debuff>0 && defSoldier.def_debuff_time>0){
+			// 有防御debuff
+			var def_ratio=DefDebuffData[defSoldier.def_debuff]["value"];
+			console.log("防御 debuff",def_ratio);
+			if(DefDebuffData[defSoldier.def_debuff]["type"]==1){
+				// 百分比防御加成
+				defence=Math.floor(defence*def_ratio);
+			}else if(DefDebuffData[defSoldier.def_debuff]["type"]==2){
+				// 固定值加成
+				defence=defence-def_ratio;
+			}else{
+				defence=defence;
+			}
+		}
+		defSoldier.getDamage(attack-defence);
+	},
+	reduceBuffDebuffTime: function(){
+		for(var i=0;i<this.teamArr1.length;i++){
+			this.teamArr1[i].reduceBuffDebuffTime();
+		}
+		for(var i=0;i<this.teamArr2.length;i++){
+			this.teamArr2[i].reduceBuffDebuffTime();
+		}
 	}
 });

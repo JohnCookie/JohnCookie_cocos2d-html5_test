@@ -10,8 +10,14 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	curr_agility:0,
 	mass: 0,
 	radius: 20,
-	buff: 0,
-	debuff: 0, 
+	atk_buff: 0,
+	atk_buff_time: 0,
+	def_buff: 0,
+	def_buff_time: 0,
+	atk_debuff: 0,
+	atk_debuff_time: 0,
+	def_debuff:0,
+	def_debuff_time: 0, 
 	mainSprite: null,
 	bloodSprite: null,
 	bloodChangeSprite: null,
@@ -19,6 +25,7 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	effectSprite: null,
 	team: 0, //0,1
 	actionPointLabel: null, // 额外信息层
+	skillNameLabel: null, // 显示技能名称
 	ctor: function(type,team){
 		this._super();
 
@@ -60,6 +67,12 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.effectSprite=new SimpleEffectSprite(60,70);
 		this.effectSprite.setPosition(0,0);
 		// this.addChild(this.effectSprite);
+
+		//技能名称
+		this.skillNameLabel=cc.LabelTTF.create("Skill Name","Arial",12);
+		this.skillNameLabel.setPosition(30,0);
+		this.skillNameLabel.setColor(commonColor3B["red"]);
+		// this.addChild(this.skillNameLabel);
 	},
 	draw: function(){
 		// this._super();
@@ -113,11 +126,13 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		var actionMove=cc.MoveBy.create(1,new cc.Point(0,20));
 		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.bloodChangeSprite,this);
 		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
+		Game.gameStatus=Game.status.ANIM_ON;
 		this.bloodChangeSprite.runAction(actionFinal);
 		console.log(damageDetail);
 		if(damageDetail["die"]==1){
 			console.log("---Soldier Die---");
 			this.getParent().dieSoldier(this);
+			Game.gameStatus=Game.status.NORMAL;
 		}
 	},
 	getHeal: function(heal){
@@ -131,6 +146,7 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		var actionMove=cc.MoveBy.create(1,new cc.Point(0,20));
 		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.bloodChangeSprite,this);
 		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
+		Game.gameStatus=Game.status.ANIM_ON;
 		this.bloodChangeSprite.runAction(actionFinal);
 	},
 	reduceAgility: function(reduce){
@@ -144,16 +160,54 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	removeSpriteCallback:function(sprite,parent){
 		cc.log("removeSprite");
 		parent.removeChild(sprite);
+		Game.gameStatus=Game.status.NORMAL;
 	},
 	targetBlink: function(){
 		this.addChild(this.effectSprite);
 		var blinkAction = cc.Blink.create(2, 3);
 		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.effectSprite,this);
 		var actionFinal=cc.Sequence.create(blinkAction,actionCallback);
+		// Game.gameStatus=Game.status.ANIM_ON;
 		this.effectSprite.runAction(actionFinal);
+		Game.targetShowed=true;
 	},
 	resetAgility: function(){
 		this.curr_agility=this.agility;
 		this.actionPointLabel.setString(this.curr_agility);
+	},
+	reduceBuffDebuffTime: function(){
+		this.atk_buff_time-=1;
+		if(this.atk_buff_time<=0){
+			this.atk_buff=0
+			this.atk_buff_time=0;
+		}
+
+		this.atk_debuff_time-=1;
+		if(this.atk_debuff_time<=0){
+			this.atk_debuff=0
+			this.atk_debuff_time=0;
+		}
+
+		this.def_buff_time-=1;
+		if(this.def_buff_time<=0){
+			this.def_buff=0
+			this.def_buff_time=0;
+		}
+
+		this.def_debuff_time-=1;
+		if(this.def_debuff_time<=0){
+			this.atk_debuff=0
+			this.def_debuff_time=0;
+		}
+	},
+	showSkillName: function(skillId){
+		var skillName=SkillData[skillId]["name"];
+		this.skillNameLabel.setString(skillName);
+		this.addChild(this.skillNameLabel);
+		var scaleAction = cc.ScaleBy.create(0.5, 2, 2);
+		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.skillNameLabel,this);
+		var actionFinal=cc.Sequence.create(scaleAction,actionCallback);
+		Game.gameStatus=Game.status.ANIM_ON;
+		this.skillNameLabel.runAction(actionFinal);
 	}
 });

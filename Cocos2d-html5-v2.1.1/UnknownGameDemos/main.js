@@ -42,7 +42,13 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"Sprites/spriteRes/hero.png"},
             {type:"image", src:"res/tilemap/tmw_desert_spacing.png"},
             {type:"tmx", src:"res/tilemap/tilemapbg.tmx"},
-            {type:"image", src:"Sprites/spriteRes/arrow.png"}
+            {type:"image", src:"Sprites/spriteRes/arrow.png"},
+            {type:"image", src:"Sprites/spriteRes/heros/2.png"},
+            {type:"image", src:"Sprites/spriteRes/heros/22.png"},
+            {type:"image", src:"Sprites/spriteRes/heros/117.png"},
+            {type:"image", src:"Sprites/spriteRes/heros/knight.png"},
+            {type:"image", src:"Sprites/spriteRes/heros/archer.png"},
+            {type:"image", src:"Sprites/spriteRes/heros/wizard.png"}
         ]);
     },
     applicationDidFinishLaunching:function () {
