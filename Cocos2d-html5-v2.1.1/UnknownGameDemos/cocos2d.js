@@ -9,7 +9,7 @@
         frameRate:60,
         tag:'gameCanvas', //the dom element to run cocos2d on
         engineDir:'../cocos2d/',
-        appFiles:['global.js','data/SoldierData.js','data/SkillData.js','data/BuffData.js','data/DebuffData.js','Sprites/ArrowSprite.js','Sprites/SimpleEffectSprite.js','Sprites/SimpleHPSprite.js','Sprites/SimpleShapeSprite.js','Sprites/SimpleBtnSprite.js','Sprites/BaseSoldierSprite.js','Sprites/SimpleBloodSprite.js','Sprites/SimpleBulletSprite.js','MapLayer.js','MainLayer.js','UILayer.js','MyFirstApp.js','GameScene.js']
+        appFiles:['global.js','data/SoldierData.js','data/SkillData.js','data/BuffData.js','data/DebuffData.js','Sprites/ArrowSprite.js','Sprites/SimpleStatusSprite.js','Sprites/SimpleEffectSprite.js','Sprites/SimpleHPSprite.js','Sprites/SimpleShapeSprite.js','Sprites/SimpleBtnSprite.js','Sprites/BaseSoldierSprite.js','Sprites/SimpleBloodSprite.js','Sprites/SimpleBulletSprite.js','MapLayer.js','MainLayer.js','UILayer.js','MyFirstApp.js','GameScene.js']
     };
     window.addEventListener('DOMContentLoaded', function () {
         //first load engine file if specified

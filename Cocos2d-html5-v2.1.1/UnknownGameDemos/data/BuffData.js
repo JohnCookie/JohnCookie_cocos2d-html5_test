@@ -7,5 +7,9 @@ var AtkBuffData={
 }
 
 var DefBuffData={
-	
+	1:{
+		"name":"Shield Wall",
+		"type":1,
+		"value":1.5
+	}
 }

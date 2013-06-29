@@ -2,6 +2,7 @@ var MainLayer=cc.Layer.extend({
 	teamArr1:null,
 	teamArr2:null,
 	bulletArr:new Array(),
+	specialFlyerArr: new Array(),
 	arrowSprite: null,
 	tempTouchPoint: null,
 	activeSprite: null,
@@ -19,7 +20,8 @@ var MainLayer=cc.Layer.extend({
 		this.schedule(this.update);
 	},
 	update: function(dt){
-		if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0){
+		// console.log(this.bulletArr.length);
+		if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0){
 			if(Game.targetShowed==false){
 				console.log("next round");
 				// 控制buff时间
@@ -561,7 +563,8 @@ var MainLayer=cc.Layer.extend({
 		var skillUsed=this.getParent().uiLayer.getSkillUsed();
 		console.log("use skill:",skillUsed);
 		var skillId=SoldierData[soldier.type]["skill"+skillUsed];
-		console.log(skillId);
+		console.log("skill id",skillId);
+		console.log("Skill type",SkillData[skillId]["type"]);
 		switch(SkillData[skillId]["type"]){
 			case 1:
 				// 自身增益型buff/debuff
@@ -576,6 +579,31 @@ var MainLayer=cc.Layer.extend({
 				soldier.def_debuff_time=SkillData[skillId]["def_debuff_time"];
 				break;
 			case 2:
+				console.log("释放攻击技能");
+				// 攻击技能
+				if(skillId==3){
+					//分裂箭
+					//发射3枚子弹
+					console.log("分裂箭");
+					var center=soldier.getCenterPosition();
+					console.log(angle);
+					angle-=0.3;
+					for(var i=0;i<3;i++){
+						var bullet=new SimpleBulletSprite(center.x,center.y,commonColor4B["black"]);
+						bullet.setPosition(center.x,center.y);
+						console.log("soldier pos:",soldier.getPosition());
+						console.log(center);
+						bullet.vx=Math.sin(angle)*10;
+						bullet.vy=Math.cos(angle)*10;
+						var bid=this.specialFlyerArr.length;
+						bullet.id=bid;
+						bullet.power=SkillData[skillId]["power"];
+						this.specialFlyerArr.push(bullet);
+						
+						this.addChild(bullet);
+						angle+=0.3;
+					}
+				}
 				break;
 			case 3:
 				break;
@@ -587,22 +615,44 @@ var MainLayer=cc.Layer.extend({
 			this.bulletArr[k].y+=this.bulletArr[k].vy;
 			this.bulletArr[k].setPosition(this.bulletArr[k].x,this.bulletArr[k].y);
 		}
+		// 技能释放的子弹
+		for(var k=0;k<this.specialFlyerArr.length;k++){
+			this.specialFlyerArr[k].x+=this.specialFlyerArr[k].vx;
+			this.specialFlyerArr[k].y+=this.specialFlyerArr[k].vy;
+			this.specialFlyerArr[k].setPosition(this.specialFlyerArr[k].x,this.specialFlyerArr[k].y);
+		}
 	},
 	checkBulletCollision: function(){
 		if(this.activeSprite){
 			if(this.activeSprite.team==0){
 				//检查和2队的碰撞
+				//普通子弹
 				for(var i=0;i<this.bulletArr.length;i++){
 					for(var j=0;j<this.teamArr2.length;j++){
 						this.bulletCollision(this.bulletArr[i],this.teamArr2[j]);
 					}
 				}
+
+				//特殊子弹
+				for(var i=0;i<this.specialFlyerArr.length;i++){
+					for(var j=0;j<this.teamArr2.length;j++){
+						this.specialBulletCollision(this.specialFlyerArr[i],this.teamArr2[j]);
+					}
+				}
 			}
 			if(this.activeSprite.team==1){
 				//检查和1队的碰撞
+				//普通子弹
 				for(var i=0;i<this.bulletArr.length;i++){
 					for(var j=0;j<this.teamArr1.length;j++){
 						this.bulletCollision(this.bulletArr[i],this.teamArr1[j]);
+					}
+				}
+
+				//特殊子弹
+				for(var i=0;i<this.specialFlyerArr.length;i++){
+					for(var j=0;j<this.teamArr1.length;j++){
+						this.specialBulletCollision(this.specialFlyerArr[i],this.teamArr1[j]);
 					}
 				}
 			}
@@ -627,22 +677,60 @@ var MainLayer=cc.Layer.extend({
 				this.removeBullet(bullet);
 			}
 			// console.log(bulletPos);
-			if(bulletPos.x<0 || bulletPos.x>Game.mapWidth || bulletPos.y<0 || bulletPos.y>Game.mapHeight){
+			if(bulletPos.x<=0 || bulletPos.x>=Game.mapWidth || bulletPos.y<=0 || bulletPos.y>=Game.mapHeight){
 				this.removeBullet(bullet);
+			}
+		}
+	},
+	specialBulletCollision: function(bullet,ball){
+		if(bullet && ball){
+			var dx=ball.x-bullet.x;
+			var dy=ball.y-bullet.y;
+			var dist=Math.sqrt(dx*dx+dy*dy);
+
+			var bulletPos=bullet.getBulletPosition();
+			if(dist<=ball.radius){
+				//shoot on target
+				// var tpos={"x":bullet.x,"y":bullet.y};
+				// this.showCollision(tpos);
+				// ball.reduceBlood(10);
+
+				// 攻防
+				power=bullet.power;
+				this.makeDamageWithBuff(ball,power);
+				
+				this.removeSpecialBullet(bullet);
+			}
+			// console.log(bulletPos);
+			if(bulletPos.x<=0 || bulletPos.x>=Game.mapWidth || bulletPos.y<=0 || bulletPos.y>=Game.mapHeight){
+				this.removeSpecialBullet(bullet);
 			}
 		}
 	},
 	removeBullet: function(bullet){
 		//删除子弹 1 找到id 删掉数组中该id的bullet 并且其他所有处于他之后的bullet id都-1
-		var bid=bullet.id;
-		this.bulletArr=this.bulletArr.del(bid);
-		if(bid<this.bulletArr.length && bid!=0){
-			for(var a=bid;a<this.bulletArr.length;a++){
-				this.bulletArr[a].id-=1;
-			}
-		}
+		// var bid=bullet.id;
+		// this.bulletArr=this.bulletArr.del(bid);
+		// if(bid<this.bulletArr.length && bid!=0){
+		// 	for(var a=bid;a<this.bulletArr.length;a++){
+		// 		this.bulletArr[a].id-=1;
+		// 	}
+		// }
+		this.bulletArr.remove(bullet);
 		this.removeChild(bullet);
 		console.log("removeBullet!!!");
+	},
+	removeSpecialBullet: function(bullet){
+		// var bid=bullet.id;
+		// this.specialFlyerArr=this.specialFlyerArr.del(bid);
+		// if(bid<this.specialFlyerArr.length && bid!=0){
+		// 	for(var a=bid;a<this.specialFlyerArr.length;a++){
+		// 		this.specialFlyerArr[a].id-=1;
+		// 	}
+		// }
+		this.specialFlyerArr.remove(bullet);
+		this.removeChild(bullet);
+		console.log("removeSpecialBullet!!!");
 	},
 	dieSoldier: function(soldier){
 		this.removeChild(soldier);
@@ -658,9 +746,12 @@ var MainLayer=cc.Layer.extend({
 	clearAuxiliary: function(){
 		Game.underSkill=0;
 	},
-	makeDamageWithBuff: function(defSoldier){
+	makeDamageWithBuff: function(defSoldier,power){
 		// 攻防
 		var attack=SoldierData[this.activeSprite.type]["atk"];
+		if(power){
+			attack=power;
+		}
 		var defence=SoldierData[defSoldier.type]["def"];
 		console.log("士兵基础攻击atk:",attack);
 		console.log("士兵基础防御def:",defence);

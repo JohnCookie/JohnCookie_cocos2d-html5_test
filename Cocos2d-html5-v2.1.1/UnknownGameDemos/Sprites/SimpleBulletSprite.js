@@ -9,6 +9,9 @@ var SimpleBulletSprite = cc.Sprite.extend({
 	vx:0,
 	vy:0,
 	vr:0,
+	power:0,
+	bulletType:0,
+	bulletHurted:new Array(),
 	blood:100,
 	ctor:function(x, y, color){
 		this._super();
