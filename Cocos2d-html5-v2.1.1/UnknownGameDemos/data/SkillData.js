@@ -13,6 +13,11 @@
 
 	拟每个soldier拥有一个status数组 每得到一个状态 则放入一个状态值
 */
+/*
+	正式的
+	type 1: 给自身激活某种buff/debuff的技能 （双倍攻击，盾墙等） 使用后 仍要继续进行一轮基础行动
+	type 2: 发射性技能 固定伤害的攻击技能 射出子弹等
+*/
 var SkillData={
 	1:{
 		"name":"Double Damage", // 技能名称 获得buff 使下回合攻击力翻倍
@@ -39,44 +44,25 @@ var SkillData={
 		"def_debuff_time":0
 	},
 	3:{
-		"name":"Split Arrow", // 分裂箭 射出3个方向的箭 威力35
+		"name":"Split Arrow", // 分裂箭 射出3个方向的箭
 		"type":2,
-		"power": 55,
+		"power": 45,
 	},
 	4:{
-		"name":"Piercing Arrow",
-		"type":1,
-		"atk_buff":1, // 技能提供的攻击buff id
-		"atk_buff_time": 1, //持续的回合数
-		"atk_debuff":1, // 技能提供的攻击debuff id
-		"atk_debuff_time":1,
-		"def_buff":1, // 技能提供的防御buff id
-		"def_buff_time":1,
-		"def_debuff":1, //技能提供的防御debuff id
-		"def_debuff_time":1
+		"name":"Piercing Arrow", // 穿透箭 射出具有穿透力的箭
+		"type":2,
+		"power":38, 
 	},
 	5:{
-		"name":"Ice Bolt",
-		"type":1,
-		"atk_buff":1, // 技能提供的攻击buff id
-		"atk_buff_time": 1, //持续的回合数
-		"atk_debuff":1, // 技能提供的攻击debuff id
-		"atk_debuff_time":1,
-		"def_buff":1, // 技能提供的防御buff id
-		"def_buff_time":1,
-		"def_debuff":1, //技能提供的防御debuff id
-		"def_debuff_time":1
+		"name":"Ice Bolt", // 冰箭术 射出冰箭 对目标造成伤害并且使受到伤害的目标行动力降低一半 持续5个行动回合
+		"type":2,
+		"power":35,
+		"extra_debuff":1,
+		"extra_debuff_time":5
 	},
 	6:{
-		"name":"Healing",
-		"type":1,
-		"atk_buff":1, // 技能提供的攻击buff id
-		"atk_buff_time": 1, //持续的回合数
-		"atk_debuff":1, // 技能提供的攻击debuff id
-		"atk_debuff_time":1,
-		"def_buff":1, // 技能提供的防御buff id
-		"def_buff_time":1,
-		"def_debuff":1, //技能提供的防御debuff id
-		"def_debuff_time":1
+		"name":"Healing", // 治愈术 对友方目标治疗回复血量
+		"type":2,
+		"power":15, // 技能提供的攻击buff id
 	}
 }

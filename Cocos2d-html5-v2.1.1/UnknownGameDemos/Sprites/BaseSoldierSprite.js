@@ -18,6 +18,10 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	atk_debuff_time: 0,
 	def_debuff:0,
 	def_debuff_time: 0, 
+	extra_buff:0,
+	extra_buff_time:0,
+	extra_debuff:0,
+	extra_debuff_time:0,
 	mainSprite: null,
 	bloodSprite: null,
 	bloodChangeSprite: null,
@@ -138,6 +142,7 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	getHeal: function(heal){
 		//调整血量
 		var healDetail=this.bloodSprite.getHeal(heal);
+		console.log(healDetail);
 		heal=healDetail["heal"];
 		//显示动画
 		this.bloodChangeSprite.getHeal(heal);
@@ -150,6 +155,10 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.bloodChangeSprite.runAction(actionFinal);
 	},
 	reduceAgility: function(reduce){
+		//如果中了减速效果
+		if(this.extra_debuff==1 && this.extra_debuff_time>0){
+			reduce=Math.floor(ExtraDebuffData[this.extra_debuff]["value"]*reduce);
+		}
 		if(this.curr_agility-reduce<0){
 			this.curr_agility=0;
 		}else{
@@ -198,6 +207,18 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		if(this.def_debuff_time<=0){
 			this.atk_debuff=0
 			this.def_debuff_time=0;
+		}
+
+		this.extra_buff_time-=1;
+		if(this.extra_buff_time<=0){
+			this.extra_buff=0;
+			this.extra_buff_time=0;
+		}
+
+		this.extra_debuff_time-=1;
+		if(this.extra_debuff_time<=0){
+			this.extra_debuff=0;
+			this.extra_debuff_time=0;
 		}
 	},
 	showSkillName: function(skillId){

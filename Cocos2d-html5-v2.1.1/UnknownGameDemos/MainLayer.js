@@ -3,6 +3,7 @@ var MainLayer=cc.Layer.extend({
 	teamArr2:null,
 	bulletArr:new Array(),
 	specialFlyerArr: new Array(),
+	healBulletArr: new Array(),
 	arrowSprite: null,
 	tempTouchPoint: null,
 	activeSprite: null,
@@ -21,7 +22,7 @@ var MainLayer=cc.Layer.extend({
 	},
 	update: function(dt){
 		// console.log(this.bulletArr.length);
-		if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0){
+		if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0 && this.healBulletArr.length<=0){
 			if(Game.targetShowed==false){
 				console.log("next round");
 				// 控制buff时间
@@ -604,6 +605,62 @@ var MainLayer=cc.Layer.extend({
 						angle+=0.3;
 					}
 				}
+				if(skillId==4){
+					//穿透箭
+					//发射一枚具有穿透力的子弹
+					console.log("穿透箭");
+					var center=soldier.getCenterPosition();
+					var bullet = new SimpleBulletSprite(center.x,center.y,commonColor4B["black"]);
+					bullet.setPosition(center.x,center.y);
+					bullet.vx=Math.sin(angle)*10;
+					bullet.vy=Math.cos(angle)*10;
+					var bid=this.specialFlyerArr.length;
+					bullet.id=bid;
+					bullet.power=SkillData[skillId]["power"];
+					bullet.bulletType=1;// 特殊子弹
+					bullet.bulletHurted=new Array();
+					this.specialFlyerArr.push(bullet);
+
+					this.addChild(bullet);
+				}
+				if(skillId==5){
+					//冰箭术
+					//一枚冰箭 对击中的目标造成伤害并使移动力减半
+					console.log("冰箭术");
+					var center=soldier.getCenterPosition();
+					var bullet = new SimpleBulletSprite(center.x,center.y,commonColor4B["blue"]);
+					bullet.setPosition(center.x,center.y);
+					bullet.vx=Math.sin(angle)*10;
+					bullet.vy=Math.cos(angle)*10;
+					var bid=this.specialFlyerArr.length;
+					bullet.id=bid;
+					bullet.power=SkillData[skillId]["power"];
+					bullet.bulletType=2;
+					bullet.extra_debuff=1;
+					bullet.extra_debuff_time=5;
+					bullet.bulletHurted=new Array();
+					this.specialFlyerArr.push(bullet);
+
+					this.addChild(bullet);
+				}
+				if(skillId==6){
+					// 治愈术
+					// 回复一个友军目标的血量
+					console.log("治愈术");
+					var center=soldier.getCenterPosition();
+					var bullet = new SimpleBulletSprite(center.x,center.y,commonColor4B["white"]);
+					bullet.setPosition(center.x,center.y);
+					bullet.vx=Math.sin(angle)*10;
+					bullet.vy=Math.cos(angle)*10;
+					var bid=this.healBulletArr.length;
+					bullet.id=bid;
+					bullet.power=SkillData[skillId]["power"];
+					bullet.bulletHurted=new Array();
+					bullet.bulletHurted.push(soldier);
+					this.healBulletArr.push(bullet);
+
+					this.addChild(bullet);
+				}
 				break;
 			case 3:
 				break;
@@ -620,6 +677,12 @@ var MainLayer=cc.Layer.extend({
 			this.specialFlyerArr[k].x+=this.specialFlyerArr[k].vx;
 			this.specialFlyerArr[k].y+=this.specialFlyerArr[k].vy;
 			this.specialFlyerArr[k].setPosition(this.specialFlyerArr[k].x,this.specialFlyerArr[k].y);
+		}
+		// 治愈的子弹
+		for(var k=0;k<this.healBulletArr.length;k++){
+			this.healBulletArr[k].x+=this.healBulletArr[k].vx;
+			this.healBulletArr[k].y+=this.healBulletArr[k].vy;
+			this.healBulletArr[k].setPosition(this.healBulletArr[k].x,this.healBulletArr[k].y);
 		}
 	},
 	checkBulletCollision: function(){
@@ -639,6 +702,13 @@ var MainLayer=cc.Layer.extend({
 						this.specialBulletCollision(this.specialFlyerArr[i],this.teamArr2[j]);
 					}
 				}
+
+				//友方子弹
+				for(var i=0;i<this.healBulletArr.length;i++){
+					for(var j=0;j<this.teamArr1.length;j++){
+						this.healBulletCollision(this.healBulletArr[i],this.teamArr1[j]);
+					}
+				}
 			}
 			if(this.activeSprite.team==1){
 				//检查和1队的碰撞
@@ -653,6 +723,13 @@ var MainLayer=cc.Layer.extend({
 				for(var i=0;i<this.specialFlyerArr.length;i++){
 					for(var j=0;j<this.teamArr1.length;j++){
 						this.specialBulletCollision(this.specialFlyerArr[i],this.teamArr1[j]);
+					}
+				}
+
+				//友方子弹
+				for(var i=0;i<this.healBulletArr.length;i++){
+					for(var j=0;j<this.teamArr2.length;j++){
+						this.healBulletCollision(this.healBulletArr[i],this.teamArr2[j]);
 					}
 				}
 			}
@@ -689,21 +766,69 @@ var MainLayer=cc.Layer.extend({
 			var dist=Math.sqrt(dx*dx+dy*dy);
 
 			var bulletPos=bullet.getBulletPosition();
-			if(dist<=ball.radius){
-				//shoot on target
-				// var tpos={"x":bullet.x,"y":bullet.y};
-				// this.showCollision(tpos);
-				// ball.reduceBlood(10);
 
-				// 攻防
-				power=bullet.power;
-				this.makeDamageWithBuff(ball,power);
-				
-				this.removeSpecialBullet(bullet);
+			var hurtedIndex=bullet.bulletHurted.indexOf(ball);
+			// console.log("bullet hurt index",hurtedIndex);
+			if(hurtedIndex==-1){
+				// 在已造成伤害列表中找不到
+				if(dist<=ball.radius){
+					//shoot on target
+					// var tpos={"x":bullet.x,"y":bullet.y};
+					// this.showCollision(tpos);
+					// ball.reduceBlood(10);
+
+					// 攻防
+					var power=bullet.power;
+					this.makeDamageWithBuff(ball,power);
+					// 添加附加的效果
+					if(bullet.bulletType==2){
+						console.log("Ice Bolt Hit!!");
+						this.addBuffDebufff(ball,bullet);
+						console.log(ball);
+					}
+
+					bullet.bulletHurted.push(ball);
+					
+					console.log("bullet type",bullet.bulletType);
+					if(bullet.bulletType!=1){
+						// 普通子弹 击中目标就移除
+						this.removeSpecialBullet(bullet);
+					}
+				}
 			}
 			// console.log(bulletPos);
 			if(bulletPos.x<=0 || bulletPos.x>=Game.mapWidth || bulletPos.y<=0 || bulletPos.y>=Game.mapHeight){
 				this.removeSpecialBullet(bullet);
+			}
+		}
+	},
+	healBulletCollision: function(bullet,ball){
+		if(bullet && ball){
+			var dx=ball.x-bullet.x;
+			var dy=ball.y-bullet.y;
+			var dist=Math.sqrt(dx*dx+dy*dy);
+
+			var bulletPos=bullet.getBulletPosition();
+
+			var hurtedIndex=bullet.bulletHurted.indexOf(ball);
+			// console.log("bullet hurt index",hurtedIndex);
+			if(hurtedIndex==-1){
+				if(dist<=ball.radius){
+					//shoot on target
+					// var tpos={"x":bullet.x,"y":bullet.y};
+					// this.showCollision(tpos);
+					// ball.reduceBlood(10);
+
+					// 攻防
+					var power=bullet.power;
+					this.makeHeal(ball,power);
+					
+					this.removeHealBullet(bullet);
+				}
+			}
+			// console.log(bulletPos);
+			if(bulletPos.x<=0 || bulletPos.x>=Game.mapWidth || bulletPos.y<=0 || bulletPos.y>=Game.mapHeight){
+				this.removeHealBullet(bullet);
 			}
 		}
 	},
@@ -731,6 +856,11 @@ var MainLayer=cc.Layer.extend({
 		this.specialFlyerArr.remove(bullet);
 		this.removeChild(bullet);
 		console.log("removeSpecialBullet!!!");
+	},
+	removeHealBullet: function(bullet){
+		this.healBulletArr.remove(bullet);
+		this.removeChild(bullet);
+		console.log("removeHealBullet!!!");
 	},
 	dieSoldier: function(soldier){
 		this.removeChild(soldier);
@@ -812,6 +942,35 @@ var MainLayer=cc.Layer.extend({
 			}
 		}
 		defSoldier.getDamage(attack-defence);
+	},
+	makeHeal: function(soldier,power){
+		soldier.getHeal(power);
+	},
+	addBuffDebufff: function(soldier,bullet){
+		if(bullet.atk_buff>0){
+			soldier.atk_buff=bullet.atk_buff;
+			soldier.atk_buff_time=bullet.atk_buff_time;
+		}
+		if(bullet.atk_debuff>0){
+			soldier.atk_debuff=bullet.atk_debuff;
+			soldier.atk_debuff_time=bullet.atk_debuff_time;
+		}
+		if(bullet.def_buff>0){
+			soldier.def_buff=bullet.def_buff;
+			soldier.def_buff_time=bullet.def_buff_time;
+		}
+		if(bullet.def_debuff>0){
+			soldier.def_debuff=bullet.def_debuff;
+			soldier.def_debuff_time=bullet.def_debuff_time;
+		}
+		if(bullet.extra_buff>0){
+			soldier.extra_buff=bullet.extra_buff;
+			soldier.extra_buff_time=bullet.extra_buff_time;
+		}
+		if(bullet.extra_debuff>0){
+			soldier.extra_debuff=bullet.extra_debuff;
+			soldier.extra_debuff_time=bullet.extra_debuff_time;
+		}
 	},
 	reduceBuffDebuffTime: function(){
 		for(var i=0;i<this.teamArr1.length;i++){

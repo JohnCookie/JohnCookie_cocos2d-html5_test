@@ -13,3 +13,7 @@ var DefBuffData={
 		"value":1.5
 	}
 }
+
+var ExtraBuffData={
+	
+}
