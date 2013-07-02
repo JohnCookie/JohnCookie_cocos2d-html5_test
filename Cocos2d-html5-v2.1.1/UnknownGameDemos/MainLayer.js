@@ -22,18 +22,29 @@ var MainLayer=cc.Layer.extend({
 	},
 	update: function(dt){
 		// console.log(this.bulletArr.length);
-		if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0 && this.healBulletArr.length<=0){
+		if(Game.gameStatus==Game.status.END){
+			console.log("Game is End");
+		}else if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0 && this.healBulletArr.length<=0){
 			if(Game.targetShowed==false){
 				console.log("next round");
-				// 控制buff时间
-				this.reduceBuffDebuffTime();
-				// 取下一个行动的士兵
-				this.curr_activeSprite=this.getNextActiveSprite();
-				this.getParent().sightOnSoldier(this.curr_activeSprite);
-				this.curr_activeSprite.targetBlink();
-				this.lastHurtedSprite=null;
+				if(this.teamArr1.length<=0 || this.teamArr2.length<=0){
+					Game.gameStatus=Game.status.END;
+					if(this.teamArr1.length<=0){
+						this.getParent().uiLayer.showLose();						
+					}else{
+						this.getParent().uiLayer.showWin();
+					}
+				}else{
+					// 控制buff时间
+					this.reduceBuffDebuffTime();
+					// 取下一个行动的士兵
+					this.curr_activeSprite=this.getNextActiveSprite();
+					this.getParent().sightOnSoldier(this.curr_activeSprite);
+					this.curr_activeSprite.targetBlink();
+					this.lastHurtedSprite=null;
 
-				this.clearAuxiliary(); // 清除辅助变量 例如标示处于何种全局buff影响下等
+					this.clearAuxiliary(); // 清除辅助变量 例如标示处于何种全局buff影响下等
+				}
 			}
 		}else{
 			this.soldierStep(); // 士兵移动
@@ -44,6 +55,7 @@ var MainLayer=cc.Layer.extend({
 			
 			Game.targetShowed=false;
 		}
+		this.soldierUpdateBuffDebuff();
 	},
 	onTouchesEnded: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
@@ -196,6 +208,7 @@ var MainLayer=cc.Layer.extend({
 		Game.gameStatus=0;
 		if(this.getParent()){
 			if(this.getParent().uiLayer){
+				this.getParent().uiLayer.removeChild(this.getParent().uiLayer.gameResultLabel);
 				this.getParent().uiLayer.setPosition(0,0);
 			}
 			if(this.getParent().mainLayer){
@@ -210,6 +223,19 @@ var MainLayer=cc.Layer.extend({
 		this.teamArr2=new Array();
 
 		console.log("----- Init Game -----");
+		//队伍1
+		this.randomSoldierToGame(1,0,100,600,100,600);
+		// this.randomSoldierToGame(1,0,100,600,100,600);
+		// this.randomSoldierToGame(2,0,100,600,100,600);
+		// this.randomSoldierToGame(2,0,100,600,100,600);
+		// this.randomSoldierToGame(3,0,100,600,100,600);
+		//队伍2
+		this.randomSoldierToGame(1,1,500,1000,500,1000);
+		// this.randomSoldierToGame(1,1,500,1000,500,1000);
+		// this.randomSoldierToGame(2,1,500,1000,500,1000);
+		// this.randomSoldierToGame(2,1,500,1000,500,1000);
+		// this.randomSoldierToGame(3,1,500,1000,500,1000);
+		/*
 		//队伍1
 		//两个近战兵
 		var melee=new BaseSoldierSprite(1,0);
@@ -261,11 +287,52 @@ var MainLayer=cc.Layer.extend({
 		this.teamArr2.push(magic);
 		magic.setPosition(Game.mapWidth-250-fixValueX,Game.mapHeight-100-fixValueY);
 		this.addChild(magic);
+		*/
 
 		if(this.getParent()){
 			this.getParent().showWholeMap();
 		}
 		
+	},
+	randomSoldierToGame: function(type,team,fx,tx,fy,ty){
+		var soldier=new BaseSoldierSprite(type,team);
+		while(true){
+			var pX=Math.random()*(tx-fx)+fx;
+			var pY=Math.random()*(ty-fy)+fy;
+
+			var collided=false;
+			for(var i=0;i<this.teamArr1.length;i++){
+				if(cc.rectOverlapsRect(new cc.Rect(pX,pY,60,70),this.teamArr1[i].getBoundingBox())){
+					console.log("collided1, reroll position");
+					collided=true;
+					break;
+				}
+			}
+			if(!collided){
+				for(var j=0;j<this.teamArr2.length;j++){
+					if(cc.rectOverlapsRect(new cc.Rect(pX,pY,60,70),this.teamArr2[j].getBoundingBox())){
+						console.log("collided2, reroll position");
+						collided=true;
+						break;
+					}
+				}
+			}
+			
+			if(!collided){
+				break;
+			}
+			console.log("collided, reroll position");
+		}
+		console.log("aaa");
+		soldier.setPosition(pX,pY);
+		if(team==0){
+			this.teamArr1.push(soldier);
+		}
+		if(team==1){
+			this.teamArr2.push(soldier);
+		}
+		
+		this.addChild(soldier);
 	},
 	soldierStep: function(){
 		var factor=1;
@@ -978,6 +1045,14 @@ var MainLayer=cc.Layer.extend({
 		}
 		for(var i=0;i<this.teamArr2.length;i++){
 			this.teamArr2[i].reduceBuffDebuffTime();
+		}
+	},
+	soldierUpdateBuffDebuff: function(){
+		for(var i=0;i<this.teamArr1.length;i++){
+			this.teamArr1[i].refreshStatus();
+		}
+		for(var i=0;i<this.teamArr2.length;i++){
+			this.teamArr2[i].refreshStatus();
 		}
 	}
 });

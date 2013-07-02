@@ -14,6 +14,7 @@ Game.status={};
 Game.status.NORMAL=0; // 正常状态(可以点击按钮 使用技能 弹射士兵的状态)
 Game.status.ANIM_ON=1; // 播放动画状态
 Game.status.PAUSE=2; // 暂停状态
+Game.status.END=3; // 游戏结束
 
 var commonColor4B={
 	"red":new cc.Color4B(255,0,0,255),

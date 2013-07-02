@@ -29,7 +29,8 @@ var SkillData={
 		"def_buff":0, // 技能提供的防御buff id
 		"def_buff_time":0,
 		"def_debuff":0, //技能提供的防御debuff id
-		"def_debuff_time":0
+		"def_debuff_time":0,
+		"cd":20
 	},
 	2:{
 		"name":"Shield Wall", // 获得buff 使防御力提高1.5倍 持续8个行动回合
@@ -41,28 +42,33 @@ var SkillData={
 		"def_buff":1, // 技能提供的防御buff id
 		"def_buff_time":8,
 		"def_debuff":0, //技能提供的防御debuff id
-		"def_debuff_time":0
+		"def_debuff_time":0,
+		"cd":20
 	},
 	3:{
 		"name":"Split Arrow", // 分裂箭 射出3个方向的箭
 		"type":2,
 		"power": 45,
+		"cd":20
 	},
 	4:{
 		"name":"Piercing Arrow", // 穿透箭 射出具有穿透力的箭
 		"type":2,
 		"power":38, 
+		"cd":20
 	},
 	5:{
 		"name":"Ice Bolt", // 冰箭术 射出冰箭 对目标造成伤害并且使受到伤害的目标行动力降低一半 持续5个行动回合
 		"type":2,
 		"power":35,
 		"extra_debuff":1,
-		"extra_debuff_time":5
+		"extra_debuff_time":5,
+		"cd":20
 	},
 	6:{
 		"name":"Healing", // 治愈术 对友方目标治疗回复血量
 		"type":2,
 		"power":15, // 技能提供的攻击buff id
+		"cd":20
 	}
 }

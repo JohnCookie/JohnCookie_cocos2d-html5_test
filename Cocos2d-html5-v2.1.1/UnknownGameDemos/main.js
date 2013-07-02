@@ -48,7 +48,13 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"Sprites/spriteRes/heros/117.png"},
             {type:"image", src:"Sprites/spriteRes/heros/knight.png"},
             {type:"image", src:"Sprites/spriteRes/heros/archer.png"},
-            {type:"image", src:"Sprites/spriteRes/heros/wizard.png"}
+            {type:"image", src:"Sprites/spriteRes/heros/wizard.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/1_1.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/1_2.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/2_1.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/2_2.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/3_1.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/3_2.png"}
         ]);
     },
     applicationDidFinishLaunching:function () {

@@ -2,6 +2,7 @@ var GameLayer=cc.Layer.extend({
 	mainLayer:null,
 	uiLayer:null,
 	mapLayer:null,
+	effectLayer:null,
 	__touchBeganPoint:null, //use to offset the Layers
 	currWorldPoint:null,
 	init: function(){

@@ -30,6 +30,11 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	team: 0, //0,1
 	actionPointLabel: null, // 额外信息层
 	skillNameLabel: null, // 显示技能名称
+	atkStatusSprite: null,
+	defStatusSprite: null,
+	extraStatusSprite: null,
+	skill1_cd:0,
+	skill2_cd:0,
 	ctor: function(type,team){
 		this._super();
 
@@ -77,6 +82,21 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.skillNameLabel.setPosition(30,0);
 		this.skillNameLabel.setColor(commonColor3B["red"]);
 		// this.addChild(this.skillNameLabel);
+
+		//攻击buff/debuff显示位置
+		this.atkStatusSprite=new SimpleStatusSprite(1,1);
+		this.atkStatusSprite.setPosition(0,50);
+		// this.addChild(this.atkStatusSprite);
+
+		//防御buff/debuff显示位置
+		this.defStatusSprite=new SimpleStatusSprite(3,1);
+		this.defStatusSprite.setPosition(0,50-12);
+		// this.addChild(this.defStatusSprite);
+
+		//额外buff显示位置
+		this.extraStatusSprite=new SimpleStatusSprite(6,1);
+		this.extraStatusSprite.setPosition(0,50-12*2);
+		// this.addChild(this.extraStatusSprite);
 	},
 	draw: function(){
 		// this._super();
@@ -99,7 +119,6 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	    }
 	},
 	update: function(){
-
 	},
 	setPosition: function(newPosOrxValue,yValue){
 		//覆盖原来的setPosition方法 设置精灵碰撞检测用的x y
@@ -224,11 +243,61 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	showSkillName: function(skillId){
 		var skillName=SkillData[skillId]["name"];
 		this.skillNameLabel.setString(skillName);
+		this.skillNameLabel.setScale(1);
 		this.addChild(this.skillNameLabel);
 		var scaleAction = cc.ScaleBy.create(0.5, 2, 2);
 		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.skillNameLabel,this);
 		var actionFinal=cc.Sequence.create(scaleAction,actionCallback);
 		Game.gameStatus=Game.status.ANIM_ON;
 		this.skillNameLabel.runAction(actionFinal);
+	},
+	refreshStatus: function(){
+		if(this.atk_buff>0 && this.atk_buff_time>0){
+			this.atkStatusSprite.setStatus(1,this.atk_buff);
+			if(this.atkStatusSprite.getParent()==null){
+				this.addChild(this.atkStatusSprite);
+			}
+		}
+		if(this.atk_debuff>0 && this.atk_debuff_time>0){
+			this.atkStatusSprite.setStatus(2,this.atk_debuff);
+			if(this.atkStatusSprite.getParent()==null){
+				this.addChild(this.atkStatusSprite);
+			}
+		}
+		if(this.atk_buff<=0 && this.atk_debuff<=0){
+			this.removeChild(this.atkStatusSprite);
+		}
+
+		if(this.def_buff>0 && this.def_buff_time>0){
+			this.defStatusSprite.setStatus(3,this.def_buff);
+			if(this.defStatusSprite.getParent()==null){
+				this.addChild(this.defStatusSprite);
+			}
+		}
+		if(this.def_debuff>0 && this.def_debuff_time>0){
+			this.defStatusSprite.setStatus(4,this.def_debuff);
+			if(this.defStatusSprite.getParent()==null){
+				this.addChild(this.defStatusSprite);
+			}
+		}
+		if(this.def_buff<=0 && this.def_debuff<=0){
+			this.removeChild(this.defStatusSprite);
+		}
+
+		if(this.extra_buff>0 && this.extra_buff_time>0){
+			this.extraStatusSprite.setStatus(5,this.extra_buff);
+			if(this.extraStatusSprite.getParent()==null){
+				this.addChild(this.extraStatusSprite);
+			}
+		}
+		if(this.extra_debuff>0 && this.extra_debuff_time>0){
+			this.extraStatusSprite.setStatus(6,this.extra_debuff);
+			if(this.extraStatusSprite.getParent()==null){
+				this.addChild(this.extraStatusSprite);
+			}
+		}
+		if(this.extra_buff<0 && this.extra_debuff<=0){
+			this.removeChild(this.extraStatusSprite);
+		}
 	}
 });

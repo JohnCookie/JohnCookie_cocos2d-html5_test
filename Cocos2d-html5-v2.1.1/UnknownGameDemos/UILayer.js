@@ -6,6 +6,7 @@ var UILayer=cc.Layer.extend({
 	teamStatusLabel:null,
 	showSpriteBorderBtn:null,
 	showSpriteCollisionBorderBtn:null,
+	gameResultLabel:null, // 显示游戏结果的label
 	init: function(){
 		this._super();
 		this.setTouchEnabled(true);
@@ -63,6 +64,12 @@ var UILayer=cc.Layer.extend({
 		this.showSpriteCollisionBorderBtn.setPosition(new cc.Point(200,10));
 		this.showSpriteCollisionBorderBtn.setString("CollisionArea On/Off");
 		this.addChild(this.showSpriteCollisionBorderBtn);
+
+		// 游戏结果显示
+		this.gameResultLabel=cc.LabelTTF.create("Game Over","Arial",48);
+		this.gameResultLabel.setPosition(size.width/2,size.height/2);
+		this.gameResultLabel.setColor(commonColor3B["red"]);
+		// this.addChild(this.gameResultLabel);
 	},
 	onTouchesEnded: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
@@ -121,5 +128,13 @@ var UILayer=cc.Layer.extend({
 			return 2;
 		}
 		return 0;
+	},
+	showWin: function(){
+		this.gameResultLabel.setString("You Win !");
+		this.addChild(this.gameResultLabel);
+	},
+	showLose: function(){
+		this.gameResultLabel.setString("Game Over !");
+		this.addChild(this.gameResultLabel);
 	}
 });
