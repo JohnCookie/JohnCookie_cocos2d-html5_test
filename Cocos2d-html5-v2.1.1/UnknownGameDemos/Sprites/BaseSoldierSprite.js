@@ -46,6 +46,9 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.radius=SoldierData[type]["radius"];
 		this.agility=SoldierData[type]["agility"];
 		this.curr_agility=SoldierData[type]["agility"];
+		//技能cd
+		this.skill1_cd=SkillData[SoldierData[type]["skill1"]]["cd"];
+		this.skill2_cd=SkillData[SoldierData[type]["skill2"]]["cd"];
 
 		this.setContentSize(new cc.Size(60,70));
 		// 精灵主体
@@ -149,8 +152,9 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		var actionMove=cc.MoveBy.create(1,new cc.Point(0,20));
 		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.bloodChangeSprite,this);
 		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
-		Game.gameStatus=Game.status.ANIM_ON;
 		this.bloodChangeSprite.runAction(actionFinal);
+		Game.gameStatus=Game.status.ANIM_ON;
+		
 		console.log(damageDetail);
 		if(damageDetail["die"]==1){
 			console.log("---Soldier Die---");
@@ -170,8 +174,9 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		var actionMove=cc.MoveBy.create(1,new cc.Point(0,20));
 		var actionCallback=cc.CallFunc.create(this.removeSpriteCallback,this.bloodChangeSprite,this);
 		var actionFinal=cc.Sequence.create(actionMove,actionCallback);
-		Game.gameStatus=Game.status.ANIM_ON;
 		this.bloodChangeSprite.runAction(actionFinal);
+		Game.gameStatus=Game.status.ANIM_ON;
+		
 	},
 	reduceAgility: function(reduce){
 		//如果中了减速效果
@@ -298,6 +303,17 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		}
 		if(this.extra_buff<0 && this.extra_debuff<=0){
 			this.removeChild(this.extraStatusSprite);
+		}
+	},
+	reduceSkillCD: function(){
+		this.skill1_cd-=1;
+		if(this.skill1_cd<0){
+			this.skill1_cd=0;
+		}
+
+		this.skill2_cd-=1;
+		if(this.skill2_cd<0){
+			this.skill2_cd=0;
 		}
 	}
 });

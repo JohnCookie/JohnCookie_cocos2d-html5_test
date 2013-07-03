@@ -117,7 +117,7 @@ var GameLayer=cc.Layer.extend({
 		if(center.x<Game.width/2){
 			center.x=0;
 		}else if(center.x>Game.mapWidth-Game.width/2){
-			center.x=Game.mapWidth-Game.width/2;
+			center.x=Game.mapWidth-Game.width;
 		}else{
 			center.x-=Game.width/2;
 		}
@@ -125,7 +125,7 @@ var GameLayer=cc.Layer.extend({
 		if(center.y<Game.height/2){
 			center.y=0;
 		}else if(center.y>Game.mapHeight-Game.height/2){
-			center.y=Game.mapHeight-Game.height/2;
+			center.y=Game.mapHeight-Game.height;
 		}else{
 			center.y-=Game.height/2;
 		}

@@ -6,6 +6,7 @@ var UILayer=cc.Layer.extend({
 	teamStatusLabel:null,
 	showSpriteBorderBtn:null,
 	showSpriteCollisionBorderBtn:null,
+	testSkillBtn:null,
 	gameResultLabel:null, // 显示游戏结果的label
 	init: function(){
 		this._super();
@@ -20,15 +21,21 @@ var UILayer=cc.Layer.extend({
 		this.addChild(this.restartBtn);
 
 		// 技能按钮1
-		this.skillBtn1=new SimpleBtnSprite(new cc.Color4B(200,200,0,130),new cc.Size(50,50),new cc.Color3B(0,100,0),true);
-		this.skillBtn1.setPosition(new cc.Point(size.width-50*3-20,10));
-		this.skillBtn1.setString("Skill 1");
+		// this.skillBtn1=new SimpleBtnSprite(new cc.Color4B(200,200,0,130),new cc.Size(50,50),new cc.Color3B(0,100,0),true);
+		// this.skillBtn1.setPosition(new cc.Point(size.width-50*3-20,10));
+		// this.skillBtn1.setString("Skill 1");
+		// this.addChild(this.skillBtn1);
+		this.skillBtn1=new SimpleSkillSprite();
+		this.skillBtn1.setPosition(size.width-50*3-20+25,10+25);
 		this.addChild(this.skillBtn1);
 
 		// 技能按钮2
-		this.skillBtn2=new SimpleBtnSprite(new cc.Color4B(200,200,0,130),new cc.Size(50,50),new cc.Color3B(0,100,0),true);
-		this.skillBtn2.setPosition(new cc.Point(size.width-50*2,10));
-		this.skillBtn2.setString("Skill 2");
+		// this.skillBtn2=new SimpleBtnSprite(new cc.Color4B(200,200,0,130),new cc.Size(50,50),new cc.Color3B(0,100,0),true);
+		// this.skillBtn2.setPosition(new cc.Point(size.width-50*2,10));
+		// this.skillBtn2.setString("Skill 2");
+		// this.addChild(this.skillBtn2);
+		this.skillBtn2=new SimpleSkillSprite();
+		this.skillBtn2.setPosition(size.width-50*2+25,10+25);
 		this.addChild(this.skillBtn2);
 
 		// 取消技能按钮
@@ -81,15 +88,27 @@ var UILayer=cc.Layer.extend({
 		}
 		if(cc.rectContainsPoint(this.skillBtn1.getBoundingBox(),touchPoint)){
 			console.log("---Skill 1---");
-			this.skillBtn1.setBgColor(new cc.Color4B(255,100,10,200));
-			this.skillBtn2.setBgColor(new cc.Color4B(200,200,0,130));
-			this.skillBtn1.status=1;
+			// this.skillBtn1.setBgColor(new cc.Color4B(255,100,10,200));
+			// this.skillBtn2.setBgColor(new cc.Color4B(200,200,0,130));
+			// this.skillBtn1.status=1;
+			if(this.getParent().mainLayer.curr_activeSprite.skill1_cd<=0){
+				this.skillBtn1.setBG(1);
+				this.skillBtn2.setBG(0);
+			}else{
+				console.log("The skill is not in CD",this.getParent().mainLayer.curr_activeSprite.skill1_cd);			
+			}
 		}
 		if(cc.rectContainsPoint(this.skillBtn2.getBoundingBox(),touchPoint)){
 			console.log("---Skill 2---");
-			this.skillBtn2.setBgColor(new cc.Color4B(255,100,10,200));
-			this.skillBtn1.setBgColor(new cc.Color4B(200,200,0,130));
-			this.skillBtn2.status=1;
+			// this.skillBtn2.setBgColor(new cc.Color4B(255,100,10,200));
+			// this.skillBtn1.setBgColor(new cc.Color4B(200,200,0,130));
+			// this.skillBtn2.status=1;
+			if(this.getParent().mainLayer.curr_activeSprite.skill2_cd<=0){
+				this.skillBtn1.setBG(0);
+				this.skillBtn2.setBG(1);
+			}else{
+				console.log("The skill is not in CD",this.getParent().mainLayer.curr_activeSprite.skill2_cd);
+			}
 		}
 		if(cc.rectContainsPoint(this.cancelSkillBtn.getBoundingBox(),touchPoint)){
 			console.log("---Cancel Skill---");
@@ -111,10 +130,12 @@ var UILayer=cc.Layer.extend({
 		var touchPoint=pTouch[0].getLocation();
 	},
 	resetSkillState: function(){
-		this.skillBtn1.setBgColor(new cc.Color4B(200,200,0,130));
-		this.skillBtn2.setBgColor(new cc.Color4B(200,200,0,130));
-		this.skillBtn1.status=0;
-		this.skillBtn2.status=0;
+		// this.skillBtn1.setBgColor(new cc.Color4B(200,200,0,130));
+		// this.skillBtn2.setBgColor(new cc.Color4B(200,200,0,130));
+		// this.skillBtn1.status=0;
+		// this.skillBtn2.status=0;
+		this.skillBtn1.setBG(0);
+		this.skillBtn2.setBG(0);
 	},
 	refreshTeamStatus: function(numA,numB){
 		this.teamStatusLabel.setTeamANum(numA);

@@ -35,10 +35,12 @@ var MainLayer=cc.Layer.extend({
 						this.getParent().uiLayer.showWin();
 					}
 				}else{
-					// 控制buff时间
-					this.reduceBuffDebuffTime();
+					// 控制buff时间 技能CD时间
+					this.reduceBuffCDTime();
 					// 取下一个行动的士兵
 					this.curr_activeSprite=this.getNextActiveSprite();
+					// 设置技能图标和CD
+					this.setSkillCD(this.curr_activeSprite);
 					this.getParent().sightOnSoldier(this.curr_activeSprite);
 					this.curr_activeSprite.targetBlink();
 					this.lastHurtedSprite=null;
@@ -732,6 +734,13 @@ var MainLayer=cc.Layer.extend({
 			case 3:
 				break;
 		}
+		// 重新统计技能CD
+		if(skillUsed==1){
+			soldier.skill1_cd=SkillData[skillId]["cd"];
+		}
+		if(skillUsed==2){
+			soldier.skill2_cd=SkillData[skillId]["cd"];
+		}
 	},
 	bulletStep: function(){
 		for(var k=0;k<this.bulletArr.length;k++){
@@ -1039,12 +1048,14 @@ var MainLayer=cc.Layer.extend({
 			soldier.extra_debuff_time=bullet.extra_debuff_time;
 		}
 	},
-	reduceBuffDebuffTime: function(){
+	reduceBuffCDTime: function(){
 		for(var i=0;i<this.teamArr1.length;i++){
 			this.teamArr1[i].reduceBuffDebuffTime();
+			this.teamArr1[i].reduceSkillCD();
 		}
 		for(var i=0;i<this.teamArr2.length;i++){
 			this.teamArr2[i].reduceBuffDebuffTime();
+			this.teamArr2[i].reduceSkillCD();
 		}
 	},
 	soldierUpdateBuffDebuff: function(){
@@ -1054,5 +1065,12 @@ var MainLayer=cc.Layer.extend({
 		for(var i=0;i<this.teamArr2.length;i++){
 			this.teamArr2[i].refreshStatus();
 		}
+	},
+	setSkillCD: function(soldier){
+		this.getParent().uiLayer.skillBtn1.setSkill(SoldierData[soldier.type]["skill1"]);
+		this.getParent().uiLayer.skillBtn1.setCD(soldier.skill1_cd);
+
+		this.getParent().uiLayer.skillBtn2.setSkill(SoldierData[soldier.type]["skill2"]);
+		this.getParent().uiLayer.skillBtn2.setCD(soldier.skill2_cd);
 	}
 });
