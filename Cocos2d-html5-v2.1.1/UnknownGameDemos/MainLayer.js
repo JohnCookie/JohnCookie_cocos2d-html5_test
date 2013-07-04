@@ -46,6 +46,14 @@ var MainLayer=cc.Layer.extend({
 					this.lastHurtedSprite=null;
 
 					this.clearAuxiliary(); // 清除辅助变量 例如标示处于何种全局buff影响下等
+
+					//AI动作延时2秒进行 不然速度太快
+					if(this.curr_activeSprite.team==1){
+						var self=this;
+						setTimeout(function(){
+							self.aiDoAction(self.curr_activeSprite);
+						}, 2000);
+					}
 				}
 			}
 		}else{
@@ -227,16 +235,16 @@ var MainLayer=cc.Layer.extend({
 		console.log("----- Init Game -----");
 		//队伍1
 		this.randomSoldierToGame(1,0,100,600,100,600);
-		// this.randomSoldierToGame(1,0,100,600,100,600);
-		// this.randomSoldierToGame(2,0,100,600,100,600);
-		// this.randomSoldierToGame(2,0,100,600,100,600);
-		// this.randomSoldierToGame(3,0,100,600,100,600);
+		this.randomSoldierToGame(1,0,100,600,100,600);
+		this.randomSoldierToGame(2,0,100,600,100,600);
+		this.randomSoldierToGame(2,0,100,600,100,600);
+		this.randomSoldierToGame(3,0,100,600,100,600);
 		//队伍2
 		this.randomSoldierToGame(1,1,500,1000,500,1000);
-		// this.randomSoldierToGame(1,1,500,1000,500,1000);
-		// this.randomSoldierToGame(2,1,500,1000,500,1000);
-		// this.randomSoldierToGame(2,1,500,1000,500,1000);
-		// this.randomSoldierToGame(3,1,500,1000,500,1000);
+		this.randomSoldierToGame(1,1,500,1000,500,1000);
+		this.randomSoldierToGame(2,1,500,1000,500,1000);
+		this.randomSoldierToGame(2,1,500,1000,500,1000);
+		this.randomSoldierToGame(3,1,500,1000,500,1000);
 		/*
 		//队伍1
 		//两个近战兵
@@ -292,6 +300,7 @@ var MainLayer=cc.Layer.extend({
 		*/
 
 		if(this.getParent()){
+			this.getParent().uiLayer.refreshTeamStatus(this.teamArr1.length,this.teamArr2.length);
 			this.getParent().showWholeMap();
 		}
 		
@@ -1072,5 +1081,81 @@ var MainLayer=cc.Layer.extend({
 
 		this.getParent().uiLayer.skillBtn2.setSkill(SoldierData[soldier.type]["skill2"]);
 		this.getParent().uiLayer.skillBtn2.setCD(soldier.skill2_cd);
+	},
+	//AI用
+	findClosestEnemy: function(soldier){
+		var dist=99999999999;
+		var p1=soldier.getCenterPosition();
+		var targetSoldier=null;
+		if(soldier.team==0){
+			//找队伍2中
+			for(var i=0;i<this.teamArr2.length;i++){
+				var p2=this.teamArr2[i].getCenterPosition();
+				var tempdist=Math.pow(p1.x-p2.x, 2)+Math.pow(p1.y-p2.y, 2);
+				if(tempdist<=dist){
+					dist=tempdist;
+					targetSoldier=this.teamArr2[i];
+				}
+			}
+			return targetSoldier;
+		}
+		if(soldier.team==1){
+			//找队伍1中
+			for(var i=0;i<this.teamArr1.length;i++){
+				var p2=this.teamArr1[i].getCenterPosition();
+				var tempdist=Math.pow(p1.x-p2.x, 2)+Math.pow(p1.y-p2.y, 2);
+				if(tempdist<=dist){
+					dist=tempdist;
+					targetSoldier=this.teamArr1[i];
+				}
+			}
+			return targetSoldier;
+		}
+	},
+	aiShoot: function(soldier,targetSoldier){
+		// 计算 target相对于本身的角度
+		var selfPosition=soldier.getCenterPosition();
+		var targetPosition=targetSoldier.getCenterPosition();
+
+		console.log("selfPosition",selfPosition);
+		console.log("targetPosition",targetPosition);
+		var dx=targetPosition.x-selfPosition.x;
+		var dy=targetPosition.y-selfPosition.y;
+		var angle=Math.atan2(dx,dy);
+
+		//精灵行动
+		//精灵移动
+		this.activeSprite.vx=10*Math.sin(angle);
+		this.activeSprite.vy=10*Math.cos(angle);
+		angle1 = angle*(180/Math.PI);
+		this.activeSprite.mainSprite.setRotation(angle1);
+
+		// AI暂时不使用技能
+		/*
+		var skillUsed=this.getParent().uiLayer.getSkillUsed();
+
+		if(skillUsed>0){
+			var skillId=SoldierData[this.activeSprite.type]["skill"+skillUsed];
+			this.activeSprite.showSkillName(skillId);
+
+			this.soldierUseSkill(this.activeSprite,angle);
+			if(SkillData[SoldierData[this.activeSprite.type]["skill"+skillUsed]]["type"]==1){
+				//如果是激活的buff类技能 那么只是赋予状态 常规工作仍要继续完成
+				this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
+			}
+		}else{
+			this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
+		}
+		*/
+		this.soldierAttackAction(this.activeSprite,angle);
+
+		this.activeSprite.resetAgility();
+
+		this.getParent().uiLayer.resetSkillState();
+	},
+	aiDoAction: function(activeSprite){
+		this.activeSprite=activeSprite;
+		var tar=this.findClosestEnemy(activeSprite);
+		this.aiShoot(activeSprite,tar);
 	}
 });

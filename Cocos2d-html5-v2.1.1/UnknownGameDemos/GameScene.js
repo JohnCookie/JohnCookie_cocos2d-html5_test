@@ -110,6 +110,7 @@ var GameLayer=cc.Layer.extend({
 		this.mainLayer.resortByAgility();
 		this.mainLayer.curr_activeSprite=this.mainLayer.getNextActiveSprite();
 		this.mainLayer.curr_activeSprite.targetBlink();
+		this.uiLayer.refreshTeamStatus(this.mainLayer.teamArr1.length,this.mainLayer.teamArr2.length);
 	},
 	sightOnSoldier: function(soldier){
 		var center=soldier.getCenterPosition();
@@ -147,6 +148,7 @@ var GameScene = cc.Scene.extend({
 		layer.init();
 		this.addChild(layer);
 
-		// layer.showWholeMap();
+		// this.uiLayer.refreshTeamStatus(this.mainLayer.teamArr1.length,this.mainLayer.teamArr2.length);
+		layer.showWholeMap();
 	}
 });
