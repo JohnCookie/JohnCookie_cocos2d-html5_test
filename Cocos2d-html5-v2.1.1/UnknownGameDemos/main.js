@@ -60,7 +60,12 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"Sprites/spriteRes/buffs/3_2.png"},
             {type:"image", src:"Sprites/spriteRes/skills/bg_select.png"},
             {type:"image", src:"Sprites/spriteRes/skills/bg_unselect.png"},
-            {type:"image", src:"Sprites/spriteRes/skills/1.png"}
+            {type:"image", src:"Sprites/spriteRes/skills/1.png"},
+            {type:"image", src:"Sprites/spriteRes/skills/2.png"},
+            {type:"image", src:"Sprites/spriteRes/skills/3.png"},
+            {type:"image", src:"Sprites/spriteRes/skills/4.png"},
+            {type:"image", src:"Sprites/spriteRes/skills/5.png"},
+            {type:"image", src:"Sprites/spriteRes/skills/6.png"}
         ]);
     },
     applicationDidFinishLaunching:function () {

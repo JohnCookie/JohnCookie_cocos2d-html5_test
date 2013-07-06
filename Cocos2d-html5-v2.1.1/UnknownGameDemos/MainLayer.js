@@ -353,7 +353,6 @@ var MainLayer=cc.Layer.extend({
 			}
 			console.log("collided, reroll position");
 		}
-		console.log("aaa");
 		soldier.setPosition(pX,pY);
 		if(team==0){
 			this.teamArr1.push(soldier);
@@ -1097,7 +1096,6 @@ var MainLayer=cc.Layer.extend({
 	setSkillCD: function(soldier){
 		this.getParent().uiLayer.skillBtn1.setSkill(SoldierData[soldier.type]["skill1"]);
 		this.getParent().uiLayer.skillBtn1.setCD(soldier.skill1_cd);
-
 		this.getParent().uiLayer.skillBtn2.setSkill(SoldierData[soldier.type]["skill2"]);
 		this.getParent().uiLayer.skillBtn2.setCD(soldier.skill2_cd);
 	},

@@ -110,6 +110,9 @@ var GameLayer=cc.Layer.extend({
 		this.mainLayer.resortByAgility();
 		this.mainLayer.curr_activeSprite=this.mainLayer.getNextActiveSprite();
 		this.mainLayer.curr_activeSprite.targetBlink();
+		// 设置技能图标和CD
+		this.mainLayer.setSkillCD(this.mainLayer.curr_activeSprite);
+		this.sightOnSoldier(this.mainLayer.curr_activeSprite);
 		this.uiLayer.refreshTeamStatus(this.mainLayer.teamArr1.length,this.mainLayer.teamArr2.length);
 	},
 	sightOnSoldier: function(soldier){

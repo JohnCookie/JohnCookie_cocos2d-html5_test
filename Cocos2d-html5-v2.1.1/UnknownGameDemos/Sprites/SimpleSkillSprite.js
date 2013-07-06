@@ -2,8 +2,8 @@ var SimpleSkillSprite=cc.Sprite.extend({
 	//技能图标精灵
 	width: 50,
 	height: 50,
-	skillWidth: 45,
-	skillHeight: 45,
+	skillWidth: 40,
+	skillHeight: 40,
 	bg_sel: "Sprites/spriteRes/skills/bg_select.png",
 	bg_unsel: "Sprites/spriteRes/skills/bg_unselect.png",
 	cdLabel: null,
@@ -44,7 +44,7 @@ var SimpleSkillSprite=cc.Sprite.extend({
 		this.addChild(this.skillImgSprite);
 
 		// CD字符显示
-		this.cdLabel=cc.LabelTTF.create("16", "Arial", 14);
+		this.cdLabel=cc.LabelTTF.create("16", "Arial", 22);
 		this.cdLabel.setColor(commonColor3B["red"]);
 		this.cdLabel.setPosition(this.width/2,this.height/2);
 		this.addChild(this.cdLabel);
