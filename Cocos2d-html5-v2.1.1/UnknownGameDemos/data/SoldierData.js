@@ -3,7 +3,7 @@ var SoldierData={
 		"name":"Basic Melee", // 士兵名称
 		"atk":30, // 攻击力
 		"def":20, // 防御力
-		"mass":20, // 质量 决定碰撞时会产生的效果
+		"mass":15, // 质量 决定碰撞时会产生的效果
 		"blood":100, // 血量
 		"radius":20, // 碰撞时用的半径
 		"type":1, // 士兵类型 1近战 2远程 3魔法
@@ -15,6 +15,10 @@ var SoldierData={
 		"skill1_img":"Sprites/spriteRes/skills/2-1.png", //技能1图标
 		"skill2":2, //技能2的id
 		"skill2_img":"Sprites/spriteRes/skills/2-1.png", //技能2图标
+		"addition_atk":0,
+		"addition_def":0,
+		"addition_blood":0,
+		"addition_agility":0
 	},
 	2:{
 		"name":"Basic Ranged",
@@ -32,6 +36,10 @@ var SoldierData={
 		"skill1_img":"Sprites/spriteRes/skills/2-1.png", //技能1图标
 		"skill2":4, //技能2的id
 		"skill2_img":"Sprites/spriteRes/skills/2-1.png", //技能2图标
+		"addition_atk":0,
+		"addition_def":0,
+		"addition_blood":0,
+		"addition_agility":0
 	},
 	3:{
 		"name":"Basic Magic",
@@ -49,5 +57,9 @@ var SoldierData={
 		"skill1_img":"Sprites/spriteRes/skills/2-1.png", //技能1图标
 		"skill2":6, //技能2的id
 		"skill2_img":"Sprites/spriteRes/skills/2-1.png", //技能2图标
+		"addition_atk":0,
+		"addition_def":0,
+		"addition_blood":0,
+		"addition_agility":0
 	}
 }

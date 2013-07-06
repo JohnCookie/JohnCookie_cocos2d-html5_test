@@ -49,15 +49,8 @@ var UILayer=cc.Layer.extend({
 		this.teamStatusLabel.setPosition(new cc.Point(size.width/2-100,size.height-40));
 		this.teamStatusLabel.setString("Team A  5  :  5  Team B");
 		this.addChild(this.teamStatusLabel);
-		this.teamStatusLabel.setTeamANum=function(num){
-			var tempStr=this.getString();
-			var index=tempStr.indexOf(":");
-			this.setString(tempStr.substring(0,index-3)+num+tempStr.substring(index-2));
-		};
-		this.teamStatusLabel.setTeamBNum=function(num){
-			var tempStr=this.getString();
-			var index=tempStr.indexOf(":");
-			this.setString(tempStr.substring(0,index+3)+num+tempStr.substring(index+4));
+		this.teamStatusLabel.setTeamNum=function(numA,numB){
+			this.setString("Team A  "+numA+"  :  "+numB+"  Team B");
 		};
 
 		// 是否显示精灵外框
@@ -138,8 +131,7 @@ var UILayer=cc.Layer.extend({
 		this.skillBtn2.setBG(0);
 	},
 	refreshTeamStatus: function(numA,numB){
-		this.teamStatusLabel.setTeamANum(numA);
-		this.teamStatusLabel.setTeamBNum(numB);
+		this.teamStatusLabel.setTeamNum(numA,numB);
 	},
 	getSkillUsed: function(){
 		if(this.skillBtn1.status==1){

@@ -48,11 +48,13 @@ var MainLayer=cc.Layer.extend({
 					this.clearAuxiliary(); // 清除辅助变量 例如标示处于何种全局buff影响下等
 
 					//AI动作延时2秒进行 不然速度太快
-					if(this.curr_activeSprite.team==1){
-						var self=this;
-						setTimeout(function(){
-							self.aiDoAction(self.curr_activeSprite);
-						}, 2000);
+					if(Game.playWithAI==1){
+						if(this.curr_activeSprite.team==1){
+							var self=this;
+							setTimeout(function(){
+								self.aiDoAction(self.curr_activeSprite);
+							}, 2000);
+						}
 					}
 				}
 			}
@@ -132,7 +134,11 @@ var MainLayer=cc.Layer.extend({
 		realTouchPoint.y=touchPoint.y-Game.currWorldPoint.y;
 		
 		this.tempTouchPoint=realTouchPoint;
-		if(this.status==0 && Game.gameStatus==Game.status.NORMAL){
+		var canControl=true;
+		if(Game.playWithAI==1 && this.curr_activeSprite.team==1){
+			canControl=false;
+		}
+		if(this.status==0 && Game.gameStatus==Game.status.NORMAL && canControl){
 			// var touchedSprite=this.touchOnSoldier(realTouchPoint);
 			// if(touchedSprite!=null){
 			if(this.isTouchOnActiveSoldier(realTouchPoint,this.curr_activeSprite)){
@@ -233,6 +239,17 @@ var MainLayer=cc.Layer.extend({
 		this.teamArr2=new Array();
 
 		console.log("----- Init Game -----");
+
+		//队伍1
+		for(var i=0;i<Game.team1Soldiers.length;i++){
+			this.randomSoldierToGame(Game.team1Soldiers[i],0,100,600,100,600);
+		}
+		//队伍2
+		for(var i=0;i<Game.team2Soldiers.length;i++){
+			this.randomSoldierToGame(Game.team2Soldiers[i],1,500,1000,500,1000);
+		}
+		/*
+		//写死的随机到位置
 		//队伍1
 		this.randomSoldierToGame(1,0,100,600,100,600);
 		this.randomSoldierToGame(1,0,100,600,100,600);
@@ -245,7 +262,9 @@ var MainLayer=cc.Layer.extend({
 		this.randomSoldierToGame(2,1,500,1000,500,1000);
 		this.randomSoldierToGame(2,1,500,1000,500,1000);
 		this.randomSoldierToGame(3,1,500,1000,500,1000);
+		*/
 		/*
+		//写死的单个添加到固定位置
 		//队伍1
 		//两个近战兵
 		var melee=new BaseSoldierSprite(1,0);
@@ -963,11 +982,11 @@ var MainLayer=cc.Layer.extend({
 	},
 	makeDamageWithBuff: function(defSoldier,power){
 		// 攻防
-		var attack=SoldierData[this.activeSprite.type]["atk"];
+		var attack=SoldierData[this.activeSprite.type]["atk"]+SoldierData[this.activeSprite.type]["addition_atk"];
 		if(power){
 			attack=power;
 		}
-		var defence=SoldierData[defSoldier.type]["def"];
+		var defence=SoldierData[defSoldier.type]["def"]+SoldierData[this.activeSprite.type]["addition_def"];
 		console.log("士兵基础攻击atk:",attack);
 		console.log("士兵基础防御def:",defence);
 		if(this.activeSprite.atk_buff>0 && this.activeSprite.atk_buff_time>0){

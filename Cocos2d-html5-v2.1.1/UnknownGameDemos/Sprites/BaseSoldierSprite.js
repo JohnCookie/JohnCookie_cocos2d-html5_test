@@ -41,11 +41,11 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.type=type;
 		this.team=team;
 
-		this.blood=SoldierData[type]["blood"];
+		this.blood=SoldierData[type]["blood"]+SoldierData[type]["addition_blood"];
 		this.mass=SoldierData[type]["mass"];
 		this.radius=SoldierData[type]["radius"];
-		this.agility=SoldierData[type]["agility"];
-		this.curr_agility=SoldierData[type]["agility"];
+		this.agility=SoldierData[type]["agility"]-SoldierData[type]["addition_agility"];
+		this.curr_agility=SoldierData[type]["agility"]-SoldierData[type]["addition_agility"];
 		//技能cd
 		this.skill1_cd=SkillData[SoldierData[type]["skill1"]]["cd"];
 		this.skill2_cd=SkillData[SoldierData[type]["skill2"]]["cd"];

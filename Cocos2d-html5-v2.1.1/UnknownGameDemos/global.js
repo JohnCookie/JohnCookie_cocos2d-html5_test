@@ -10,11 +10,18 @@ Game.targetShowed=false;
 // 游戏状态标示
 Game.gameStatus=0;
 Game.underSkill=0; //处于某一技能状态下
+Game.playWithAI=1; // 是否与AI作战
 Game.status={};
 Game.status.NORMAL=0; // 正常状态(可以点击按钮 使用技能 弹射士兵的状态)
 Game.status.ANIM_ON=1; // 播放动画状态
 Game.status.PAUSE=2; // 暂停状态
 Game.status.END=3; // 游戏结束
+
+//调整数值用的
+Game.remainPoint=10;
+//双方的军队
+Game.team1Soldiers=new Array(1,1,2,2,3);
+Game.team2Soldiers=new Array(1,1,2,2,3);
 
 var commonColor4B={
 	"red":new cc.Color4B(255,0,0,255),

@@ -43,6 +43,9 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"res/tilemap/tmw_desert_spacing.png"},
             {type:"tmx", src:"res/tilemap/tilemapbg.tmx"},
             {type:"image", src:"Sprites/spriteRes/arrow.png"},
+            {type:"image", src:"Sprites/spriteRes/plus_btn.png"},
+            {type:"image", src:"Sprites/spriteRes/minus_btn.png"},
+            {type:"image", src:"Sprites/spriteRes/back.png"},
             {type:"image", src:"Sprites/spriteRes/heros/2.png"},
             {type:"image", src:"Sprites/spriteRes/heros/22.png"},
             {type:"image", src:"Sprites/spriteRes/heros/117.png"},
@@ -70,5 +73,6 @@ var cocos2dApp = cc.Application.extend({
     }
 });
 console.log("main.js load");
-var myApp = new cocos2dApp(GameScene);
+// var myApp = new cocos2dApp(GameScene);
+var myApp = new cocos2dApp(StartGameScene);
 
