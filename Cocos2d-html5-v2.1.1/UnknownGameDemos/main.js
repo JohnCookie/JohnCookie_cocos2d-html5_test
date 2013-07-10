@@ -52,6 +52,7 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"Sprites/spriteRes/heros/knight.png"},
             {type:"image", src:"Sprites/spriteRes/heros/archer.png"},
             {type:"image", src:"Sprites/spriteRes/heros/wizard.png"},
+            {type:"image", src:"Sprites/spriteRes/heros/shaman.png"},
             {type:"image", src:"Sprites/spriteRes/buffs/1_1.png"},
             {type:"image", src:"Sprites/spriteRes/buffs/1_2.png"},
             {type:"image", src:"Sprites/spriteRes/buffs/2_1.png"},

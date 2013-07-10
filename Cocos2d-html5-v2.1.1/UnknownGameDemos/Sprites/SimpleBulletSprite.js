@@ -4,6 +4,8 @@ var SimpleBulletSprite = cc.Sprite.extend({
 	radius:0,
 	color:null,
 	img:null,
+	ox:0,
+	oy:0,//初始的x y 计算射程用
 	x:0,
 	y:0,
 	vx:0,
@@ -24,6 +26,7 @@ var SimpleBulletSprite = cc.Sprite.extend({
 	extra_debuff:0,
 	extra_debuff_time:0,
 	bulletHurted:new Array(),
+	dist:100, //射程
 	blood:100,
 	ctor:function(x, y, color){
 		this._super();
@@ -32,6 +35,8 @@ var SimpleBulletSprite = cc.Sprite.extend({
 
 		this.x=x;
 		this.y=y;
+		this.ox=x;
+		this.oy=y;
 		this.color=color;
 	},
 	draw:function(){

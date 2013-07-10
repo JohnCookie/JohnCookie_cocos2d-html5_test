@@ -109,11 +109,23 @@ var GameLayer=cc.Layer.extend({
 
 		this.mainLayer.resortByAgility();
 		this.mainLayer.curr_activeSprite=this.mainLayer.getNextActiveSprite();
+		console.log(this.mainLayer.curr_activeSprite);
+		this.mainLayer.activeSprite=this.mainLayer.curr_activeSprite;
 		this.mainLayer.curr_activeSprite.targetBlink();
 		// 设置技能图标和CD
 		this.mainLayer.setSkillCD(this.mainLayer.curr_activeSprite);
 		this.sightOnSoldier(this.mainLayer.curr_activeSprite);
 		this.uiLayer.refreshTeamStatus(this.mainLayer.teamArr1.length,this.mainLayer.teamArr2.length);
+
+		//AI动作延时2秒进行 不然速度太快
+		if(Game.playWithAI==1){
+			if(this.mainLayer.curr_activeSprite.team==1){
+				var self=this.mainLayer;
+				setTimeout(function(){
+					self.aiDoAction(self.curr_activeSprite);
+				}, 2000);
+			}
+		}
 	},
 	sightOnSoldier: function(soldier){
 		var center=soldier.getCenterPosition();
@@ -153,5 +165,12 @@ var GameScene = cc.Scene.extend({
 
 		// this.uiLayer.refreshTeamStatus(this.mainLayer.teamArr1.length,this.mainLayer.teamArr2.length);
 		layer.showWholeMap();
+
+		console.log("TEST BEGIN");
+		var a=new Array();
+		var b={"a":1,"b":8};
+		a.push(b);
+		console.log(a);
+		console.log("TEST END");
 	}
 });

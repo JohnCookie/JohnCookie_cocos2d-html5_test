@@ -52,14 +52,14 @@ var SkillData={
 		"type":2,
 		"power": 45,
 		"img":"Sprites/spriteRes/skills/3.png",
-		"cd":20
+		"cd":25
 	},
 	4:{
 		"name":"Piercing Arrow", // 穿透箭 射出具有穿透力的箭
 		"type":2,
 		"power":38, 
 		"img":"Sprites/spriteRes/skills/4.png",
-		"cd":15
+		"cd":20
 	},
 	5:{
 		"name":"Ice Bolt", // 冰箭术 射出冰箭 对目标造成伤害并且使受到伤害的目标行动力降低一半 持续5个行动回合
@@ -68,13 +68,31 @@ var SkillData={
 		"extra_debuff":1,
 		"extra_debuff_time":5,
 		"img":"Sprites/spriteRes/skills/5.png",
-		"cd":15
+		"cd":18
 	},
 	6:{
 		"name":"Healing", // 治愈术 对友方目标治疗回复血量
 		"type":2,
 		"power":20, // 技能提供的攻击buff id
 		"img":"Sprites/spriteRes/skills/6.png",
-		"cd":10
+		"cd":22
+	},
+	7:{
+		"name":"Pray/Curse", // 治愈术 对友方目标治疗回复血量
+		"type":2,
+		"power":0, // 技能提供的攻击buff id
+		"atk_buff":2,
+		"def_buff":2,
+		"atk_debuff":1,
+		"def_debuff":1,
+		"img":"Sprites/spriteRes/skills/6.png",
+		"cd":22
+	},
+	8:{
+		"name":"Healing Totem", // 治愈术 对友方目标治疗回复血量
+		"type":3,
+		"extra_buff":1, // 技能提供的攻击buff id
+		"img":"Sprites/spriteRes/skills/6.png",
+		"cd":22
 	}
 }

@@ -39,6 +39,8 @@ var MainLayer=cc.Layer.extend({
 					this.reduceBuffCDTime();
 					// 取下一个行动的士兵
 					this.curr_activeSprite=this.getNextActiveSprite();
+					console.log("curr_activeSprite",this.curr_activeSprite);
+					// this.activeSprite=this.curr_activeSprite;
 					// 设置技能图标和CD
 					this.setSkillCD(this.curr_activeSprite);
 					this.getParent().sightOnSoldier(this.curr_activeSprite);
@@ -248,6 +250,7 @@ var MainLayer=cc.Layer.extend({
 		for(var i=0;i<Game.team2Soldiers.length;i++){
 			this.randomSoldierToGame(Game.team2Soldiers[i],1,500,1000,500,1000);
 		}
+		console.log(this.teamArr1[0].def_buff);
 		/*
 		//写死的随机到位置
 		//队伍1
@@ -320,7 +323,7 @@ var MainLayer=cc.Layer.extend({
 
 		if(this.getParent()){
 			this.getParent().uiLayer.refreshTeamStatus(this.teamArr1.length,this.teamArr2.length);
-			this.getParent().showWholeMap();
+			// this.getParent().showWholeMap();
 		}
 		
 	},
@@ -622,8 +625,6 @@ var MainLayer=cc.Layer.extend({
 	},
 	soldierAttackAction: function(soldier,angle){
 		var center=soldier.getCenterPosition();
-		console.log("bullet start pos:",center);
-		console.log("soldertype:",SoldierData[soldier.type]["type"]);
 		switch(SoldierData[soldier.type]["type"]){
 			case 1:
 				console.log("Melee action");
@@ -638,6 +639,7 @@ var MainLayer=cc.Layer.extend({
 				bullet.vy=Math.cos(angle)*10;
 				var bid=this.bulletArr.length;
 				bullet.id=bid;
+				bullet.dist=SoldierData[soldier.type]["dist"];
 				this.bulletArr.push(bullet);
 				
 				this.addChild(bullet);
@@ -650,6 +652,7 @@ var MainLayer=cc.Layer.extend({
 				bullet.vy=Math.cos(angle)*10;
 				var bid=this.bulletArr.length;
 				bullet.id=bid;
+				bullet.dist=SoldierData[soldier.type]["dist"];
 				this.bulletArr.push(bullet);
 				
 				this.addChild(bullet);
@@ -658,22 +661,47 @@ var MainLayer=cc.Layer.extend({
 	},
 	soldierUseSkill: function(soldier,angle){
 		var skillUsed=this.getParent().uiLayer.getSkillUsed();
-		console.log("use skill:",skillUsed);
 		var skillId=SoldierData[soldier.type]["skill"+skillUsed];
-		console.log("skill id",skillId);
-		console.log("Skill type",SkillData[skillId]["type"]);
+		console.log("useSkill Sprite",soldier);
 		switch(SkillData[skillId]["type"]){
 			case 1:
 				// 自身增益型buff/debuff
-				soldier.atk_buff=SkillData[skillId]["atk_buff"];
-				soldier.atk_buff_time=SkillData[skillId]["atk_buff_time"];
-				soldier.atk_debuff=SkillData[skillId]["atk_debuff"];
-				soldier.atk_debuff_time=SkillData[skillId]["atk_debuff_time"];
-				
-				soldier.def_buff=SkillData[skillId]["def_buff"];
-				soldier.def_buff_time=SkillData[skillId]["def_buff_time"];
-				soldier.def_debuff=SkillData[skillId]["def_debuff"];
-				soldier.def_debuff_time=SkillData[skillId]["def_debuff_time"];
+				if(SkillData[skillId]["atk_buff"]>0){
+					var atkbuff={"id":SkillData[skillId]["atk_buff"],"duration":SkillData[skillId]["atk_buff_time"]};
+					var tindex=soldier.atk_buff.existKey("id",atkbuff["id"]);
+					if(tindex>0){
+						soldier.atk_buff[tindex]["duration"]=atkbuff["duration"];
+					}else{
+						soldier.atk_buff.push(atkbuff);
+					}
+				}
+				if(SkillData[skillId]["atk_debuff"]>0){
+					var atkdebuff={"id":SkillData[skillId]["atk_debuff"],"duration":SkillData[skillId]["atk_debuff_time"]};
+					var tindex=soldier.atk_debuff.existKey("id",atkdebuff["id"]);
+					if(tindex>0){
+						soldier.atk_debuff[tindex]["duration"]=atkdebuff["duration"];
+					}else{
+						soldier.atk_debuff.push(atkdebuff);
+					}
+				}
+				if(SkillData[skillId]["def_buff"]>0){
+					var defbuff={"id":SkillData[skillId]["def_buff"],"duration":SkillData[skillId]["def_buff_time"]};
+					var tindex=soldier.def_buff.existKey("id",defbuff["id"]);
+					if(tindex>0){
+						soldier.def_buff[tindex]["duration"]=defbuff["duration"];
+					}else{
+						soldier.def_buff.push(defbuff);
+					}
+				}
+				if(SkillData[skillId]["def_debuff"]>0){
+					var defdebuff={"id":SkillData[skillId]["def_debuff"],"duration":SkillData[skillId]["def_debuff_time"]};
+					var tindex=soldier.def_debuff.existKey("id",defdebuff["id"]);
+					if(tindex>0){
+						soldier.def_debuff[tindex]["duration"]=defdebuff["duration"];
+					}else{
+						soldier.def_debuff.push(defdebuff);
+					}
+				}
 				break;
 			case 2:
 				console.log("释放攻击技能");
@@ -857,7 +885,13 @@ var MainLayer=cc.Layer.extend({
 				this.removeBullet(bullet);
 			}
 			// console.log(bulletPos);
+			//达到边缘
 			if(bulletPos.x<=0 || bulletPos.x>=Game.mapWidth || bulletPos.y<=0 || bulletPos.y>=Game.mapHeight){
+				this.removeBullet(bullet);
+			}
+			//达到射程
+			var curr_move_dist=Math.pow(bulletPos.x-bullet.ox,2)+Math.pow(bulletPos.y-bullet.oy,2);
+			if(curr_move_dist>Math.pow(bullet.dist,2)){
 				this.removeBullet(bullet);
 			}
 		}
@@ -988,56 +1022,56 @@ var MainLayer=cc.Layer.extend({
 		var defence=SoldierData[defSoldier.type]["def"]+SoldierData[this.activeSprite.type]["addition_def"];
 		console.log("士兵基础攻击atk:",attack);
 		console.log("士兵基础防御def:",defence);
-		if(this.activeSprite.atk_buff>0 && this.activeSprite.atk_buff_time>0){
+		for(var i=0;i<this.activeSprite.atk_buff.length;i++){
 			// 有攻击buff
-			var atk_ratio=AtkBuffData[this.activeSprite.atk_buff]["value"];
+			var atk_ratio=AtkBuffData[this.activeSprite.atk_buff[i]['id']]["value"];
 			console.log("攻击 buff",atk_ratio);
-			if(AtkBuffData[this.activeSprite.atk_buff]["type"]==1){
+			if(AtkBuffData[this.activeSprite.atk_buff[i]['id']]["type"]==1){
 				//百分比加成
 				attack=Math.floor(attack*atk_ratio);
-			}else if(AtkBuffData[this.activeSprite.atk_buff]["type"]==2){
+			}else if(AtkBuffData[this.activeSprite.atk_buff[i]['id']]["type"]==2){
 				//固定值加成
 				attack=attack+atk_ratio;
 			}else{
 				attack=attack;
 			}
 		}
-		if(this.activeSprite.atk_debuff>0 && this.activeSprite.atk_debuff_time>0){
+		for(var i=0;i<this.activeSprite.atk_debuff.length;i++){
 			// 有攻击buff
-			var atk_ratio=AtkDebuffData[this.activeSprite.atk_debuff]["value"];
+			var atk_ratio=AtkDebuffData[this.activeSprite.atk_debuff[i]['id']]["value"];
 			console.log("攻击 debuff",atk_ratio);
-			if(AtkDebuffData[this.activeSprite.atk_debuff]["type"]==1){
+			if(AtkDebuffData[this.activeSprite.atk_debuff[i]['id']]["type"]==1){
 				//百分比加成
 				attack=Math.floor(attack*atk_ratio);
-			}else if(AtkDebuffData[this.activeSprite.atk_debuff]["type"]==2){
+			}else if(AtkDebuffData[this.activeSprite.atk_debuff[i]['id']]["type"]==2){
 				//固定值加成
 				attack=attack-atk_ratio;
 			}else{
 				attack=attack;
 			}
 		}
-		if(defSoldier.def_buff>0 && defSoldier.def_buff_time>0){
+		for(var i=0;i<defSoldier.def_buff.length;i++){
 			// 有防御buff
-			var def_ratio=DefBuffData[defSoldier.def_buff]["value"];
+			var def_ratio=DefBuffData[defSoldier.def_buff[i]['id']]["value"];
 			console.log("防御 buff",def_ratio);
-			if(DefBuffData[defSoldier.def_buff]["type"]==1){
+			if(DefBuffData[defSoldier.def_buff[i]['id']]["type"]==1){
 				// 百分比防御加成
 				defence=Math.floor(defence*def_ratio);
-			}else if(DefBuffData[defSoldier.def_buff]["type"]==2){
+			}else if(DefBuffData[defSoldier.def_buff[i]['id']]["type"]==2){
 				// 固定值加成
 				defence=defence+def_ratio;
 			}else{
 				defence=defence;
 			}
 		}
-		if(defSoldier.def_debuff>0 && defSoldier.def_debuff_time>0){
+		for(var i=0;i<defSoldier.def_debuff.length;i++){
 			// 有防御debuff
-			var def_ratio=DefDebuffData[defSoldier.def_debuff]["value"];
+			var def_ratio=DefDebuffData[defSoldier.def_debuff[i]['id']]["value"];
 			console.log("防御 debuff",def_ratio);
-			if(DefDebuffData[defSoldier.def_debuff]["type"]==1){
+			if(DefDebuffData[defSoldier.def_debuff[i]['id']]["type"]==1){
 				// 百分比防御加成
 				defence=Math.floor(defence*def_ratio);
-			}else if(DefDebuffData[defSoldier.def_debuff]["type"]==2){
+			}else if(DefDebuffData[defSoldier.def_debuff[i]['id']]["type"]==2){
 				// 固定值加成
 				defence=defence-def_ratio;
 			}else{
@@ -1051,28 +1085,58 @@ var MainLayer=cc.Layer.extend({
 	},
 	addBuffDebufff: function(soldier,bullet){
 		if(bullet.atk_buff>0){
-			soldier.atk_buff=bullet.atk_buff;
-			soldier.atk_buff_time=bullet.atk_buff_time;
+			var atkbuff={"id":bullet.atk_buff,"duration":bullet.atk_buff_time};
+			var tindex=soldier.atk_buff.existKey("id",atkbuff["id"]);
+			if(tindex>0){
+				soldier.atk_buff[tindex]["duration"]=atkbuff["duration"];
+			}else{
+				soldier.atk_buff.push(atkbuff);
+			}
 		}
 		if(bullet.atk_debuff>0){
-			soldier.atk_debuff=bullet.atk_debuff;
-			soldier.atk_debuff_time=bullet.atk_debuff_time;
+			var atkdebuff={"id":bullet.atk_debuff,"duration":bullet.atk_debuff_time};
+			var tindex=soldier.atk_debuff.existKey("id",atkdebuff["id"]);
+			if(tindex>0){
+				soldier.atk_debuff[tindex]["duration"]=atkdebuff["duration"];
+			}else{
+				soldier.atk_debuff.push(atkdebuff);
+			}
 		}
 		if(bullet.def_buff>0){
-			soldier.def_buff=bullet.def_buff;
-			soldier.def_buff_time=bullet.def_buff_time;
+			var defbuff={"id":bullet.def_buff,"duration":bullet.def_buff_time};
+			var tindex=soldier.def_buff.existKey("id",defbuff["id"]);
+			if(tindex>0){
+				soldier.def_buff[tindex]["duration"]=defbuff["duration"];
+			}else{
+				soldier.def_buff.push(defbuff);
+			}
 		}
 		if(bullet.def_debuff>0){
-			soldier.def_debuff=bullet.def_debuff;
-			soldier.def_debuff_time=bullet.def_debuff_time;
+			var defdebuff={"id":bullet.def_debuff,"duration":bullet.def_debuff_time};
+			var tindex=soldier.def_debuff.existKey("id",defdebuff["id"]);
+			if(tindex>0){
+				soldier.def_debuff[tindex]["duration"]=defdebuff["duration"];
+			}else{
+				soldier.def_debuff.push(defdebuff);
+			}
 		}
 		if(bullet.extra_buff>0){
-			soldier.extra_buff=bullet.extra_buff;
-			soldier.extra_buff_time=bullet.extra_buff_time;
+			var extrabuff={"id":bullet.extra_buff,"duration":bullet.extra_buff_time};
+			var tindex=soldier.extra_buff.existKey("id",extrabuff["id"]);
+			if(tindex>0){
+				soldier.extra_buff[tindex]["duration"]=extrabuff["duration"];
+			}else{
+				soldier.extra_buff.push(extrabuff);
+			}
 		}
 		if(bullet.extra_debuff>0){
-			soldier.extra_debuff=bullet.extra_debuff;
-			soldier.extra_debuff_time=bullet.extra_debuff_time;
+			var extradebuff={"id":bullet.extra_debuff,"duration":bullet.extra_debuff_time};
+			var tindex=soldier.extra_debuff.existKey("id",extradebuff["id"]);
+			if(tindex>0){
+				soldier.extra_debuff[tindex]["duration"]=extradebuff["duration"];
+			}else{
+				soldier.extra_debuff.push(extradebuff);
+			}
 		}
 	},
 	reduceBuffCDTime: function(){

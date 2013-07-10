@@ -70,6 +70,7 @@ Array.prototype.sortByKey2=function(key) {
 	}
 	return this;
 }
+
 Array.prototype.indexOf = function(val) {
 	for (var i = 0; i < this.length; i++) {
 		if (this[i] == val) return i;
@@ -82,3 +83,28 @@ Array.prototype.remove = function(val) {
 		this.splice(index, 1);
 	}
 };
+
+Array.prototype.removeAllZero = function(key) {
+	if(this.length<=0){
+		return this;
+	}
+	var that=this.sortByKey2();
+	that.reverse();
+	for(var i=that.length-1;i>=0;i--){
+		if(that[i][key]==0){
+			that.pop();
+		}else{
+			break;
+		}
+	}
+	return that;
+};
+
+Array.prototype.existKey = function(key,value){
+	for(var i=0;i<this.length;i++){
+		if(this[i][key]==value){
+			return i;
+		}
+	}
+	return -1;
+}

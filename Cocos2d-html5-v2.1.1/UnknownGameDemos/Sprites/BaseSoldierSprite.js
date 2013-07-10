@@ -1,6 +1,6 @@
 // 整个士兵元素
 var BaseSoldierSprite=cc.Sprite.extend({
-	type: 0, //1 近战 2 远程 3 魔法
+	type: 0, //1 近战 2 远程 3 魔法 4.... 兵种类型 和soldierdata对应
 	x: 0,
 	y: 0,
 	vx: 0,
@@ -10,18 +10,12 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	curr_agility:0,
 	mass: 0,
 	radius: 20,
-	atk_buff: 0,
-	atk_buff_time: 0,
-	def_buff: 0,
-	def_buff_time: 0,
-	atk_debuff: 0,
-	atk_debuff_time: 0,
-	def_debuff:0,
-	def_debuff_time: 0, 
-	extra_buff:0,
-	extra_buff_time:0,
-	extra_debuff:0,
-	extra_debuff_time:0,
+	atk_buff: null,
+	def_buff: null,
+	atk_debuff: null, //id,duration
+	def_debuff:null,
+	extra_buff:null,
+	extra_debuff:null,
 	mainSprite: null,
 	bloodSprite: null,
 	bloodChangeSprite: null,
@@ -30,9 +24,15 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	team: 0, //0,1
 	actionPointLabel: null, // 额外信息层
 	skillNameLabel: null, // 显示技能名称
-	atkStatusSprite: null,
-	defStatusSprite: null,
-	extraStatusSprite: null,
+	statusSpriteArr:null,
+	statusSprite1: null,
+	statusSprite2: null,
+	statusSprite3: null,
+	statusSprite4: null,
+	statusSprite5: null,
+	statusSprite6: null,
+	statusSprite7: null,
+	statusSprite8: null,
 	skill1_cd:0,
 	skill2_cd:0,
 	ctor: function(type,team){
@@ -40,6 +40,13 @@ var BaseSoldierSprite=cc.Sprite.extend({
 
 		this.type=type;
 		this.team=team;
+
+		this.atk_buff=new Array();
+		this.atk_debuff=new Array();
+		this.def_buff=new Array();
+		this.def_debuff=new Array();
+		this.extra_buff=new Array();
+		this.extra_debuff=new Array();
 
 		this.blood=SoldierData[type]["blood"]+SoldierData[type]["addition_blood"];
 		this.mass=SoldierData[type]["mass"];
@@ -86,20 +93,41 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.skillNameLabel.setColor(commonColor3B["red"]);
 		// this.addChild(this.skillNameLabel);
 
-		//攻击buff/debuff显示位置
-		this.atkStatusSprite=new SimpleStatusSprite(1,1);
-		this.atkStatusSprite.setPosition(0,50);
-		// this.addChild(this.atkStatusSprite);
+		//buff/debuff显示位置
+		this.statusSprite1=new SimpleStatusSprite(1,1);
+		this.statusSprite1.setPosition(0,50);
+		// this.addChild(this.statusSprite1);
+		this.statusSprite2=new SimpleStatusSprite(3,1);
+		this.statusSprite2.setPosition(0,50-14);
+		// this.addChild(this.statusSprite2);
+		this.statusSprite3=new SimpleStatusSprite(6,1);
+		this.statusSprite3.setPosition(0,50-14*2);
+		// this.addChild(this.statusSprite3);
+		this.statusSprite4=new SimpleStatusSprite(1,1);
+		this.statusSprite4.setPosition(0,50-14*3);
+		// this.addChild(this.statusSprite4);
+		this.statusSprite5=new SimpleStatusSprite(3,1);
+		this.statusSprite5.setPosition(-14,50);
+		// this.addChild(this.statusSprite5);
+		this.statusSprite6=new SimpleStatusSprite(6,1);
+		this.statusSprite6.setPosition(-14,50-14);
+		// this.addChild(this.statusSprite6);
+		this.statusSprite7=new SimpleStatusSprite(3,1);
+		this.statusSprite7.setPosition(-14,50-14*2);
+		// this.addChild(this.statusSprite7);
+		this.statusSprite8=new SimpleStatusSprite(6,1);
+		this.statusSprite8.setPosition(-14,50-14*3);
+		// this.addChild(this.statusSprite8);
 
-		//防御buff/debuff显示位置
-		this.defStatusSprite=new SimpleStatusSprite(3,1);
-		this.defStatusSprite.setPosition(0,50-12);
-		// this.addChild(this.defStatusSprite);
-
-		//额外buff显示位置
-		this.extraStatusSprite=new SimpleStatusSprite(6,1);
-		this.extraStatusSprite.setPosition(0,50-12*2);
-		// this.addChild(this.extraStatusSprite);
+		this.statusSpriteArr=new Array();
+		this.statusSpriteArr.push(this.statusSprite1);
+		this.statusSpriteArr.push(this.statusSprite2);
+		this.statusSpriteArr.push(this.statusSprite3);
+		this.statusSpriteArr.push(this.statusSprite4);
+		this.statusSpriteArr.push(this.statusSprite5);
+		this.statusSpriteArr.push(this.statusSprite6);
+		this.statusSpriteArr.push(this.statusSprite7);
+		this.statusSpriteArr.push(this.statusSprite8);
 	},
 	draw: function(){
 		// this._super();
@@ -180,8 +208,8 @@ var BaseSoldierSprite=cc.Sprite.extend({
 	},
 	reduceAgility: function(reduce){
 		//如果中了减速效果
-		if(this.extra_debuff==1 && this.extra_debuff_time>0){
-			reduce=Math.floor(ExtraDebuffData[this.extra_debuff]["value"]*reduce);
+		if(this.extra_debuff.indexOf(1)>0){
+			reduce=Math.floor(ExtraDebuffData[1]["value"]*reduce);
 		}
 		if(this.curr_agility-reduce<0){
 			this.curr_agility=0;
@@ -209,41 +237,59 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.actionPointLabel.setString(this.curr_agility);
 	},
 	reduceBuffDebuffTime: function(){
-		this.atk_buff_time-=1;
-		if(this.atk_buff_time<=0){
-			this.atk_buff=0
-			this.atk_buff_time=0;
+		//攻击buff
+		for(var i=0;i<this.atk_buff.length;i++){
+			console.log("reduce atk buff duration");
+			this.atk_buff[i]['duration']-=1;
+			if(this.atk_buff[i]['duration']<=0){
+				console.log("atk buff end");
+				this.atk_buff[i]['duration']=0;
+			}
 		}
-
-		this.atk_debuff_time-=1;
-		if(this.atk_debuff_time<=0){
-			this.atk_debuff=0
-			this.atk_debuff_time=0;
+		this.atk_buff=this.atk_buff.removeAllZero('duration');
+		//攻击debuff
+		for(var i=0;i<this.atk_debuff.length;i++){
+			this.atk_debuff[i]['duration']-=1;
+			if(this.atk_debuff[i]['duration']<=0){
+				this.atk_debuff[i]['duration']=0
+			}
 		}
-
-		this.def_buff_time-=1;
-		if(this.def_buff_time<=0){
-			this.def_buff=0
-			this.def_buff_time=0;
+		this.atk_debuff=this.atk_debuff.removeAllZero('duration');
+		//防御buff
+		for(var i=0;i<this.def_buff.length;i++){
+			console.log("reduce def buff duration");
+			this.def_buff[i]['duration']-=1;
+			if(this.def_buff[i]['duration']<=0){
+				console.log("def buff end");
+				this.def_buff[i]['duration']=0
+			}
 		}
-
-		this.def_debuff_time-=1;
-		if(this.def_debuff_time<=0){
-			this.atk_debuff=0
-			this.def_debuff_time=0;
+		this.def_buff=this.def_buff.removeAllZero('duration');
+		//防御debuff
+		for(var i=0;i<this.def_debuff.length;i++){
+			this.def_debuff[i]['duration']-=1;
+			if(this.def_debuff[i]['duration']<=0){
+				this.def_debuff[i]['duration']=0
+			}
 		}
-
-		this.extra_buff_time-=1;
-		if(this.extra_buff_time<=0){
-			this.extra_buff=0;
-			this.extra_buff_time=0;
+		this.def_debuff=this.def_debuff.removeAllZero('duration');
+		//其他buff
+		for(var i=0;i<this.extra_buff.length;i++){
+			this.extra_buff[i]['duration']-=1;
+			if(this.extra_buff[i]['duration']<=0){
+				this.extra_buff[i]['duration']=0
+			}
 		}
-
-		this.extra_debuff_time-=1;
-		if(this.extra_debuff_time<=0){
-			this.extra_debuff=0;
-			this.extra_debuff_time=0;
+		this.extra_buff=this.extra_buff.removeAllZero('duration');
+		//其他debuff
+		for(var i=0;i<this.extra_debuff.length;i++){
+			this.extra_debuff[i]['duration']-=1;
+			if(this.extra_debuff[i]['duration']<=0){
+				console.log("extra debuff end");
+				this.extra_debuff[i]['duration']=0
+			}
 		}
+		this.extra_debuff=this.extra_debuff.removeAllZero('duration');
 	},
 	showSkillName: function(skillId){
 		var skillName=SkillData[skillId]["name"];
@@ -257,53 +303,103 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		this.skillNameLabel.runAction(actionFinal);
 	},
 	refreshStatus: function(){
-		if(this.atk_buff>0 && this.atk_buff_time>0){
-			this.atkStatusSprite.setStatus(1,this.atk_buff);
-			if(this.atkStatusSprite.getParent()==null){
-				this.addChild(this.atkStatusSprite);
+		// 清除所有状态显示
+		var buff_num=0;
+		for(var i=0;i<8;i++){
+			if(this.statusSpriteArr[i].getParent()){
+				this.removeChild(this.statusSpriteArr[i]);
 			}
 		}
-		if(this.atk_debuff>0 && this.atk_debuff_time>0){
-			this.atkStatusSprite.setStatus(2,this.atk_debuff);
-			if(this.atkStatusSprite.getParent()==null){
-				this.addChild(this.atkStatusSprite);
+		//一个个种类的buff显示
+		for(var i=0;i<this.atk_buff.length;i++){
+			this.statusSpriteArr[buff_num].setStatus(1,this.atk_buff[i]['id']);
+			buff_num++;
+			if(buff_num>8){
+				break;
 			}
 		}
-		if(this.atk_buff<=0 && this.atk_debuff<=0){
-			this.removeChild(this.atkStatusSprite);
+		if(buff_num>8){
+			for(var i=0;i<buff_num;i++){
+				if(!this.statusSpriteArr[i].getParent()){
+					this.addChild(this.statusSpriteArr[i]);
+				}
+			}
+			return;
 		}
-
-		if(this.def_buff>0 && this.def_buff_time>0){
-			this.defStatusSprite.setStatus(3,this.def_buff);
-			if(this.defStatusSprite.getParent()==null){
-				this.addChild(this.defStatusSprite);
+		for(var i=0;i<this.atk_debuff.length;i++){
+			this.statusSpriteArr[buff_num].setStatus(2,this.atk_debuff[i]['id']);
+			buff_num++;
+			if(buff_num>8){
+				break;
 			}
 		}
-		if(this.def_debuff>0 && this.def_debuff_time>0){
-			this.defStatusSprite.setStatus(4,this.def_debuff);
-			if(this.defStatusSprite.getParent()==null){
-				this.addChild(this.defStatusSprite);
+		if(buff_num>8){
+			for(var i=0;i<buff_num;i++){
+				if(!this.statusSpriteArr[i].getParent()){
+					this.addChild(this.statusSpriteArr[i]);
+				}
+			}
+			return;
+		}
+		for(var i=0;i<this.def_buff.length;i++){
+			this.statusSpriteArr[buff_num].setStatus(3,this.def_buff[i]['id']);
+			buff_num++;
+			if(buff_num>8){
+				break;
 			}
 		}
-		if(this.def_buff<=0 && this.def_debuff<=0){
-			this.removeChild(this.defStatusSprite);
+		if(buff_num>8){
+			for(var i=0;i<buff_num;i++){
+				if(!this.statusSpriteArr[i].getParent()){
+					this.addChild(this.statusSpriteArr[i]);
+				}
+			}
+			return;
 		}
-
-		if(this.extra_buff>0 && this.extra_buff_time>0){
-			this.extraStatusSprite.setStatus(5,this.extra_buff);
-			if(this.extraStatusSprite.getParent()==null){
-				this.addChild(this.extraStatusSprite);
+		for(var i=0;i<this.def_debuff.length;i++){
+			this.statusSpriteArr[buff_num].setStatus(4,this.def_debuff[i]['id']);
+			buff_num++;
+			if(buff_num>8){
+				break;
 			}
 		}
-		if(this.extra_debuff>0 && this.extra_debuff_time>0){
-			this.extraStatusSprite.setStatus(6,this.extra_debuff);
-			if(this.extraStatusSprite.getParent()==null){
-				this.addChild(this.extraStatusSprite);
+		if(buff_num>8){
+			for(var i=0;i<buff_num;i++){
+				if(!this.statusSpriteArr[i].getParent()){
+					this.addChild(this.statusSpriteArr[i]);
+				}
+			}
+			return;
+		}
+		for(var i=0;i<this.extra_buff.length;i++){
+			this.statusSpriteArr[buff_num].setStatus(5,this.extra_buff[i]['id']);
+			buff_num++;
+			if(buff_num>8){
+				break;
 			}
 		}
-		if(this.extra_buff<0 && this.extra_debuff<=0){
-			this.removeChild(this.extraStatusSprite);
+		if(buff_num>8){
+			for(var i=0;i<buff_num;i++){
+				if(!this.statusSpriteArr[i].getParent()){
+					this.addChild(this.statusSpriteArr[i]);
+				}
+			}
+			return;
 		}
+		for(var i=0;i<this.extra_debuff.length;i++){
+			this.statusSpriteArr[buff_num].setStatus(6,this.extra_debuff[i]['id']);
+			buff_num++;
+			if(buff_num>8){
+				break;
+			}
+		}
+		//将所有状态刷新上去
+		for(var i=0;i<buff_num;i++){
+			if(!this.statusSpriteArr[i].getParent()){
+				this.addChild(this.statusSpriteArr[i]);
+			}
+		}
+		return;
 	},
 	reduceSkillCD: function(){
 		this.skill1_cd-=1;
