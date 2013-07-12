@@ -399,6 +399,59 @@ var BaseSoldierSprite=cc.Sprite.extend({
 				this.addChild(this.statusSpriteArr[i]);
 			}
 		}
+
+		if(buff_num<8){
+			//小于8个buff/debuff 额外判断是否处于某种特殊光环下
+			var totems=this.getParent().totemArr;
+			for(var j=0;j<totems.length;j++){
+				if(buff_num>=8){
+					break;
+				}
+				// 判断是否处于范围内
+				var myPos=this.getCenterPosition();
+				var totemPos=totems[j].getPosition();
+				var tempDist=Math.pow(myPos.x-totemPos.x,2)+Math.pow(myPos.y-totemPos.y,2);
+				var tempRadius=Math.pow(totems[j].radius,2);
+				if(tempRadius>tempDist){
+					// 在范围内 这里每个图腾只能带一种buff/debuff 否则会出问题
+					if(this.team==totems[j].team){
+						//同队 给增益buff
+						if(totems[j].atk_buff>0){
+							this.statusSpriteArr[buff_num].setStatus(1,totems[j].atk_buff);
+							this.addChild(this.statusSpriteArr[buff_num]);
+							buff_num++;
+						}
+						if(totems[j].def_buff>0){
+							this.statusSpriteArr[buff_num].setStatus(3,totems[j].def_buff);
+							this.addChild(this.statusSpriteArr[buff_num]);
+							buff_num++;
+						}
+						if(totems[j].extra_buff>0){
+							this.statusSpriteArr[buff_num].setStatus(5,totems[j].extra_buff);
+							this.addChild(this.statusSpriteArr[buff_num]);
+							buff_num++;
+						}
+					}else{
+						if(totems[j].atk_debuff>0){
+							this.statusSpriteArr[buff_num].setStatus(2,totems[j].atk_debuff);
+							this.addChild(this.statusSpriteArr[buff_num]);
+							buff_num++;
+						}
+						if(totems[j].def_debuff>0){
+							this.statusSpriteArr[buff_num].setStatus(4,totems[j].def_debuff);
+							this.addChild(this.statusSpriteArr[buff_num]);
+							buff_num++;
+						}
+						if(totems[j].extra_debuff>0){
+							this.statusSpriteArr[buff_num].setStatus(6,totems[j].extra_debuff);
+							this.addChild(this.statusSpriteArr[buff_num]);
+							buff_num++;
+						}
+					}
+					
+				}
+			}
+		}
 		return;
 	},
 	reduceSkillCD: function(){

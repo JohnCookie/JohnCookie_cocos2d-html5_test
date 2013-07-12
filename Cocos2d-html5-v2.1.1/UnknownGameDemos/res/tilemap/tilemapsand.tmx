@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="40" height="40" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="tmw_desert_spacing" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="tmw_desert_spacing.png" width="265" height="199"/>
+ </tileset>
+ <layer name="块层 1" width="40" height="40">
+  <data encoding="base64" compression="zlib">
+   eJzlmOtKA0EMhUettV5rW7BewFartFUrvv/TmYUJhDCzZLJzifjjoyzsLmdOkjOznTrnpoxb4NkIXFuqvgfg0fNUWN8IWAL3wLfw+Rfg1bPJoGcX0TfyulLfl1tfzD9tz+2BD89nRv/wd0lq2l3/eFLfi/0wBs4YEyfvl1CNh+ji3LgyeZCyvhDo27ULz1vuvrTiWy7uvFenxvSteny0qA99bN13K0LsHunMrQ34/J/0Dc3CkvpC+xPuUa197gjlrJWs6KD5QLP2SujlmN23I9T0MtajNfNZU+sUfZo5pLlLa03p2xdS9g8+i6kzKFnfWuFB6CxmaQatZkTMt9LnWGmNJb7V3rvoGobW9Qg49pwU0KjJA8o5cOG5LOiltoa19GmZAXPPQvE8zqeVsw6vFfZ/yxzb9viGuYZnHamPb8B7Qc3S3Ih9U30Bh4I+8m9zzf+INeqcq//4u4eccUM+5thHQ+tHra3qsWXXsXtbafyL/AIM37Ab
+  </data>
+ </layer>
+ <objectgroup name="driftSand" width="40" height="40">
+  <object name="sand1" x="662" y="182" width="86" height="182"/>
+  <object name="sand2" x="662" y="180" width="150" height="56"/>
+  <object name="sand3" x="598" y="244" width="150" height="56"/>
+  <object name="sand4" x="664" y="596" width="84" height="86"/>
+  <object name="sand5" x="150" y="534" width="178" height="54"/>
+  <object name="sand6" x="246" y="534" width="82" height="150"/>
+  <object name="sand7" x="248" y="600" width="178" height="84"/>
+  <object name="sand8" x="0" y="0" width="106" height="106"/>
+  <object name="sand9" x="2" y="2" width="168" height="74"/>
+  <object name="sand10" x="0" y="0" width="74" height="172"/>
+  <object name="sand11" x="568" y="1046" width="176" height="52"/>
+  <object name="sand12" x="630" y="980" width="54" height="186"/>
+  <object name="sand13" x="888" y="790" width="178" height="86"/>
+  <object name="sand14" x="952" y="726" width="114" height="150"/>
+  <object name="sand15" x="1016" y="692" width="52" height="184"/>
+  <object name="sand16" x="1018" y="696" width="112" height="82"/>
+ </objectgroup>
+</map>

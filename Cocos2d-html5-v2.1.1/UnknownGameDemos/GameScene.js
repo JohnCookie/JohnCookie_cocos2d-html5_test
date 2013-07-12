@@ -165,12 +165,5 @@ var GameScene = cc.Scene.extend({
 
 		// this.uiLayer.refreshTeamStatus(this.mainLayer.teamArr1.length,this.mainLayer.teamArr2.length);
 		layer.showWholeMap();
-
-		console.log("TEST BEGIN");
-		var a=new Array();
-		var b={"a":1,"b":8};
-		a.push(b);
-		console.log(a);
-		console.log("TEST END");
 	}
 });

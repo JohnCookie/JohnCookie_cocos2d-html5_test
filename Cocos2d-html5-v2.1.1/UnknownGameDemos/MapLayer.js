@@ -10,7 +10,8 @@ var MapLayer = cc.Layer.extend({
 		console.log("Properties",this.tileMap.getProperties());
 		console.log("mapSize",this.tileMap.getMapSize());
 		console.log("tileSize",this.tileMap.getTileSize());
-		console.log("blocks obj",this.tileMap.getObjectGroup("blocks"));
+		// console.log("blocks obj",this.tileMap.getObjectGroup("blocks"));
+		console.log("blocks obj",this.tileMap.getObjectGroup("driftSand"));
 		Game.tileMap=this.tileMap;
 
 		this.tileMap.setPosition(new cc.Point(0,0));

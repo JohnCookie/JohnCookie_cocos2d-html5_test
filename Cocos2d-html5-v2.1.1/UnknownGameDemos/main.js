@@ -59,6 +59,8 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"Sprites/spriteRes/buffs/2_2.png"},
             {type:"image", src:"Sprites/spriteRes/buffs/3_1.png"},
             {type:"image", src:"Sprites/spriteRes/buffs/3_2.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/4_1.png"},
+            {type:"image", src:"Sprites/spriteRes/buffs/4_2.png"},
             {type:"image", src:"Sprites/spriteRes/skills/bg_select.png"},
             {type:"image", src:"Sprites/spriteRes/skills/bg_unselect.png"},
             {type:"image", src:"Sprites/spriteRes/skills/1.png"},
@@ -66,7 +68,10 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"Sprites/spriteRes/skills/3.png"},
             {type:"image", src:"Sprites/spriteRes/skills/4.png"},
             {type:"image", src:"Sprites/spriteRes/skills/5.png"},
-            {type:"image", src:"Sprites/spriteRes/skills/6.png"}
+            {type:"image", src:"Sprites/spriteRes/skills/6.png"},
+            {type:"image", src:"Sprites/spriteRes/skills/7.png"},
+            {type:"image", src:"Sprites/spriteRes/skills/8.png"},
+            {type:"image", src:"Sprites/spriteRes/totem.png"}
         ]);
     },
     applicationDidFinishLaunching:function () {

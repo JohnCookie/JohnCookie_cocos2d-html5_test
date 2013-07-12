@@ -78,21 +78,27 @@ var SkillData={
 		"cd":22
 	},
 	7:{
-		"name":"Pray/Curse", // 治愈术 对友方目标治疗回复血量
+		"name":"Pray/Curse", // 诅咒 友方增加攻击和防御buff 地方增加攻击和防御debuff
 		"type":2,
 		"power":0, // 技能提供的攻击buff id
 		"atk_buff":2,
+		"atk_buff_time":99,
 		"def_buff":2,
+		"def_buff_time":99,
 		"atk_debuff":1,
+		"atk_debuff_time":99,
 		"def_debuff":1,
-		"img":"Sprites/spriteRes/skills/6.png",
-		"cd":22
+		"def_debuff_time":99,
+		"img":"Sprites/spriteRes/skills/7.png",
+		"cd":12
 	},
 	8:{
-		"name":"Healing Totem", // 治愈术 对友方目标治疗回复血量
+		"name":"Healing Totem", // 治疗图腾 范围内所有友方受3倍治疗
 		"type":3,
-		"extra_buff":1, // 技能提供的攻击buff id
-		"img":"Sprites/spriteRes/skills/6.png",
-		"cd":22
+		"extra_buff":1,
+		"radius":150,
+		"duration":25,
+		"img":"Sprites/spriteRes/skills/8.png",
+		"cd":32
 	}
 }

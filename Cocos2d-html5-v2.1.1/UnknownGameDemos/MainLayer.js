@@ -4,6 +4,8 @@ var MainLayer=cc.Layer.extend({
 	bulletArr:new Array(),
 	specialFlyerArr: new Array(),
 	healBulletArr: new Array(),
+	blendedBulletArr: new Array(),
+	totemArr: new Array(),
 	arrowSprite: null,
 	tempTouchPoint: null,
 	activeSprite: null,
@@ -15,8 +17,16 @@ var MainLayer=cc.Layer.extend({
 		this._super();
 		this.setTouchEnabled(true);
 
-		this.demoInitTeam(5,5);
 		this.arrowSprite=new ArrowSprite();
+
+		this.bulletArr=new Array();
+		this.specialFlyerArr=new Array();
+		this.healBulletArr=new Array();
+		this.blendedBulletArr=new Array();
+
+		this.totemArr=new Array();
+
+		this.demoInitTeam(5,5);
 
 		this.schedule(this.update);
 	},
@@ -24,7 +34,7 @@ var MainLayer=cc.Layer.extend({
 		// console.log(this.bulletArr.length);
 		if(Game.gameStatus==Game.status.END){
 			console.log("Game is End");
-		}else if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0 && this.healBulletArr.length<=0){
+		}else if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0 && this.healBulletArr.length<=0 && this.blendedBulletArr.length<=0){
 			if(Game.targetShowed==false){
 				console.log("next round");
 				if(this.teamArr1.length<=0 || this.teamArr2.length<=0){
@@ -657,6 +667,22 @@ var MainLayer=cc.Layer.extend({
 				
 				this.addChild(bullet);
 				break;
+			case 4:
+				console.log("Shaman action");
+				var bullet=new SimpleBulletSprite(center.x,center.y,commonColor4B["white"]);
+				bullet.setPosition(center.x,center.y);
+				bullet.vx=Math.sin(angle)*10;
+				bullet.vy=Math.cos(angle)*10;
+				var bid=this.healBulletArr.length;
+				bullet.id=bid;
+				bullet.dist=SoldierData[soldier.type]["dist"];
+				bullet.power=SoldierData[soldier.type]["atk"];
+				bullet.bulletHurted=new Array();
+				bullet.bulletHurted.push(soldier);
+				this.healBulletArr.push(bullet);
+				
+				this.addChild(bullet);
+				break;
 		}
 	},
 	soldierUseSkill: function(soldier,angle){
@@ -760,8 +786,8 @@ var MainLayer=cc.Layer.extend({
 					bullet.id=bid;
 					bullet.power=SkillData[skillId]["power"];
 					bullet.bulletType=2;
-					bullet.extra_debuff=1;
-					bullet.extra_debuff_time=5;
+					bullet.extra_debuff=SkillData[skillId]["extra_debuff"];
+					bullet.extra_debuff_time=SkillData[skillId]["extra_debuff_time"];
 					bullet.bulletHurted=new Array();
 					this.specialFlyerArr.push(bullet);
 
@@ -785,8 +811,48 @@ var MainLayer=cc.Layer.extend({
 
 					this.addChild(bullet);
 				}
+				if(skillId==7){
+					// 萨满诅咒/祝福
+					// 给友方上buff 给敌方debuff
+					console.log("Pray and Curse");
+					var center=soldier.getCenterPosition();
+					var bullet = new SimpleBulletSprite(center.x,center.y,commonColor4B["red"]);
+					bullet.setPosition(center.x,center.y);
+					bullet.vx=Math.sin(angle)*10;
+					bullet.vy=Math.cos(angle)*10;
+					var bid=this.blendedBulletArr.length;
+					bullet.id=bid;
+					bullet.power=SkillData[skillId]["power"];
+					bullet.bulletType=2;
+					bullet.atk_buff=SkillData[skillId]["atk_buff"];
+					bullet.atk_buff_time=SkillData[skillId]["atk_buff_time"];
+					bullet.atk_debuff=SkillData[skillId]["atk_debuff"];
+					bullet.atk_debuff_time=SkillData[skillId]["atk_debuff_time"];
+					bullet.def_buff=SkillData[skillId]["def_buff"];
+					bullet.def_buff_time=SkillData[skillId]["def_buff_time"];
+					bullet.def_debuff=SkillData[skillId]["def_debuff"];
+					bullet.def_debuff_time=SkillData[skillId]["def_debuff_time"];
+					bullet.bulletHurted=new Array();
+					bullet.bulletHurted.push(soldier);
+					this.blendedBulletArr.push(bullet);
+
+					this.addChild(bullet);
+				}
 				break;
 			case 3:
+				if(skillId==8){
+					// 萨满图腾
+					// 图腾范围内的玩家收到治疗时 治疗效果提高3倍
+					console.log("Shaman's Healing Totem");
+					var center=soldier.getCenterPosition();
+					center.x+=Math.sin(angle)*100;
+					center.y+=Math.cos(angle)*100;
+					var totem=new TotemSprite(soldier.team,SkillData[skillId]["radius"],SkillData[skillId]["duration"]);
+					totem.extra_buff=SkillData[skillId]["extra_buff"];
+					totem.setPosition(center);
+					this.addChild(totem,-8,-8);
+					this.totemArr.push(totem);
+				}
 				break;
 		}
 		// 重新统计技能CD
@@ -814,6 +880,12 @@ var MainLayer=cc.Layer.extend({
 			this.healBulletArr[k].x+=this.healBulletArr[k].vx;
 			this.healBulletArr[k].y+=this.healBulletArr[k].vy;
 			this.healBulletArr[k].setPosition(this.healBulletArr[k].x,this.healBulletArr[k].y);
+		}
+		// 会和两队同时碰撞的子弹
+		for(var k=0;k<this.blendedBulletArr.length;k++){
+			this.blendedBulletArr[k].x+=this.blendedBulletArr[k].vx;
+			this.blendedBulletArr[k].y+=this.blendedBulletArr[k].vy;
+			this.blendedBulletArr[k].setPosition(this.blendedBulletArr[k].x,this.blendedBulletArr[k].y);
 		}
 	},
 	checkBulletCollision: function(){
@@ -862,6 +934,15 @@ var MainLayer=cc.Layer.extend({
 					for(var j=0;j<this.teamArr2.length;j++){
 						this.healBulletCollision(this.healBulletArr[i],this.teamArr2[j]);
 					}
+				}
+			}
+			//混合子弹 不管队伍都会产生碰撞
+			for(var i=0;i<this.blendedBulletArr.length;i++){
+				for(var j=0;j<this.teamArr1.length;j++){
+					this.blendedBulletCollision(this.blendedBulletArr[i],this.teamArr1[j]);
+				}
+				for(var j=0;j<this.teamArr2.length;j++){
+					this.blendedBulletCollision(this.blendedBulletArr[i],this.teamArr2[j]);
 				}
 			}
 		}
@@ -919,8 +1000,8 @@ var MainLayer=cc.Layer.extend({
 					this.makeDamageWithBuff(ball,power);
 					// 添加附加的效果
 					if(bullet.bulletType==2){
-						console.log("Ice Bolt Hit!!");
-						this.addBuffDebufff(ball,bullet);
+						console.log("Add buff debuff");
+						this.addBuffDebuff(ball,bullet);
 						console.log(ball);
 					}
 
@@ -958,6 +1039,7 @@ var MainLayer=cc.Layer.extend({
 
 					// 攻防
 					var power=bullet.power;
+
 					this.makeHeal(ball,power);
 					
 					this.removeHealBullet(bullet);
@@ -966,6 +1048,58 @@ var MainLayer=cc.Layer.extend({
 			// console.log(bulletPos);
 			if(bulletPos.x<=0 || bulletPos.x>=Game.mapWidth || bulletPos.y<=0 || bulletPos.y>=Game.mapHeight){
 				this.removeHealBullet(bullet);
+			}
+		}
+	},
+	blendedBulletCollision: function(bullet,ball){
+		if(bullet && ball){
+			var dx=ball.x-bullet.x;
+			var dy=ball.y-bullet.y;
+			var dist=Math.sqrt(dx*dx+dy*dy);
+
+			var bulletPos=bullet.getBulletPosition();
+
+			var hurtedIndex=bullet.bulletHurted.indexOf(ball);
+			// console.log("bullet hurt index",hurtedIndex);
+			if(hurtedIndex==-1){
+				if(dist<=ball.radius){
+					//shoot on target
+					// var tpos={"x":bullet.x,"y":bullet.y};
+					// this.showCollision(tpos);
+					// ball.reduceBlood(10);
+
+					// 攻防
+					var power=bullet.power;
+					if(power>0){
+						// 威力>0才会产生伤害或治疗
+						// this.makeHeal(ball,power);
+					}
+					// 添加附加的效果
+					if(bullet.bulletType==2){
+						console.log("Add buff debuff");
+						//根据是否敌对决定加buff还是debuff
+						if(ball.team==this.activeSprite.team){
+							//同队
+							this.addBuffOnly(ball,bullet);
+						}else{
+							//敌对
+							this.addDebuffOnly(ball,bullet);
+						}
+					}
+
+					bullet.bulletHurted.push(ball);
+					
+					if(bullet.bulletType!=1){
+						// 普通子弹 击中目标就移除
+						this.removeBlendedBullet(bullet);
+					}
+
+					this.removeBlendedBullet(bullet);
+				}
+			}
+			// console.log(bulletPos);
+			if(bulletPos.x<=0 || bulletPos.x>=Game.mapWidth || bulletPos.y<=0 || bulletPos.y>=Game.mapHeight){
+				this.removeBlendedBullet(bullet);
 			}
 		}
 	},
@@ -998,6 +1132,11 @@ var MainLayer=cc.Layer.extend({
 		this.healBulletArr.remove(bullet);
 		this.removeChild(bullet);
 		console.log("removeHealBullet!!!");
+	},
+	removeBlendedBullet: function(bullet){
+		this.blendedBulletArr.remove(bullet);
+		this.removeChild(bullet);
+		console.log("removeBlendedBullet!!!");
 	},
 	dieSoldier: function(soldier){
 		this.removeChild(soldier);
@@ -1035,9 +1174,13 @@ var MainLayer=cc.Layer.extend({
 			}else{
 				attack=attack;
 			}
+			//如果buff的id是2 那么是一次性的
+			if(this.activeSprite.atk_buff[i]['id']==2){
+				this.activeSprite.atk_buff[i]['duration']=0;
+			}
 		}
 		for(var i=0;i<this.activeSprite.atk_debuff.length;i++){
-			// 有攻击buff
+			// 有攻击debuff
 			var atk_ratio=AtkDebuffData[this.activeSprite.atk_debuff[i]['id']]["value"];
 			console.log("攻击 debuff",atk_ratio);
 			if(AtkDebuffData[this.activeSprite.atk_debuff[i]['id']]["type"]==1){
@@ -1048,6 +1191,9 @@ var MainLayer=cc.Layer.extend({
 				attack=attack-atk_ratio;
 			}else{
 				attack=attack;
+			}
+			if(this.activeSprite.atk_debuff[i]['id']==1){
+				this.activeSprite.atk_debuff[i]['duration']=0;
 			}
 		}
 		for(var i=0;i<defSoldier.def_buff.length;i++){
@@ -1063,6 +1209,9 @@ var MainLayer=cc.Layer.extend({
 			}else{
 				defence=defence;
 			}
+			if(defSoldier.def_buff[i]['id']==2){
+				defSoldier.def_buff[i]['duration']=0;
+			}
 		}
 		for(var i=0;i<defSoldier.def_debuff.length;i++){
 			// 有防御debuff
@@ -1077,13 +1226,60 @@ var MainLayer=cc.Layer.extend({
 			}else{
 				defence=defence;
 			}
+			if(defSoldier.def_debuff[i]['id']==1){
+				defSoldier.def_debuff[i]['duration']=0;
+			}
 		}
 		defSoldier.getDamage(attack-defence);
 	},
 	makeHeal: function(soldier,power){
+		// 检测是否受到地图因素影响 (现阶段就是图腾)
+		for(var j=0;j<this.totemArr.length;j++){
+			// 判断是否处于范围内
+			var myPos=soldier.getCenterPosition();
+			var totemPos=this.totemArr[j].getPosition();
+			var tempDist=Math.pow(myPos.x-totemPos.x,2)+Math.pow(myPos.y-totemPos.y,2);
+			var tempRadius=Math.pow(this.totemArr[j].radius,2);
+			if(tempRadius>tempDist){
+				// 在范围内 这里每个图腾只能带一种buff/debuff 否则会出问题
+				if(soldier.team==this.totemArr[j].team){
+					//同队 给增益buff
+					if(this.totemArr[j].extra_buff>0){
+						var heal_ratio=ExtraBuffData[this.totemArr[j].extra_buff]["value"];
+						console.log("治疗 buff",heal_ratio);
+						if(ExtraBuffData[this.totemArr[j].extra_buff]["type"]==1){
+							// 百分比防御加成
+							power=Math.floor(power*heal_ratio);
+						}else if(ExtraBuffData[this.totemArr[j].extra_buff]["type"]==2){
+							// 固定值加成
+							power=power+heal_ratio;
+						}else{
+							power=power;
+						}
+					}
+				}else{
+					if(this.totemArr[j].extra_debuff>0){
+						if(this.totemArr[j].extra_buff>0){
+							var heal_ratio=ExtraDebuffData[this.totemArr[j].extra_debuff]["value"];
+							console.log("治疗 debuff",heal_ratio);
+							if(ExtraDebuffData[this.totemArr[j].extra_debuff]["type"]==1){
+								// 百分比防御加成
+								power=Math.floor(power*heal_ratio);
+							}else if(ExtraDebuffData[this.totemArr[j].extra_debuff]["type"]==2){
+								// 固定值加成
+								power=power-heal_ratio;
+							}else{
+								power=power;
+							}
+						}
+					}
+				}
+				
+			}
+		}
 		soldier.getHeal(power);
 	},
-	addBuffDebufff: function(soldier,bullet){
+	addBuffDebuff: function(soldier,bullet){
 		if(bullet.atk_buff>0){
 			var atkbuff={"id":bullet.atk_buff,"duration":bullet.atk_buff_time};
 			var tindex=soldier.atk_buff.existKey("id",atkbuff["id"]);
@@ -1139,6 +1335,64 @@ var MainLayer=cc.Layer.extend({
 			}
 		}
 	},
+	addBuffOnly: function(soldier,bullet){
+		if(bullet.atk_buff>0){
+			var atkbuff={"id":bullet.atk_buff,"duration":bullet.atk_buff_time};
+			var tindex=soldier.atk_buff.existKey("id",atkbuff["id"]);
+			if(tindex>0){
+				soldier.atk_buff[tindex]["duration"]=atkbuff["duration"];
+			}else{
+				soldier.atk_buff.push(atkbuff);
+			}
+		}
+		if(bullet.def_buff>0){
+			var defbuff={"id":bullet.def_buff,"duration":bullet.def_buff_time};
+			var tindex=soldier.def_buff.existKey("id",defbuff["id"]);
+			if(tindex>0){
+				soldier.def_buff[tindex]["duration"]=defbuff["duration"];
+			}else{
+				soldier.def_buff.push(defbuff);
+			}
+		}
+		if(bullet.extra_buff>0){
+			var extrabuff={"id":bullet.extra_buff,"duration":bullet.extra_buff_time};
+			var tindex=soldier.extra_buff.existKey("id",extrabuff["id"]);
+			if(tindex>0){
+				soldier.extra_buff[tindex]["duration"]=extrabuff["duration"];
+			}else{
+				soldier.extra_buff.push(extrabuff);
+			}
+		}
+	},
+	addDebuffOnly: function(soldier,bullet){
+		if(bullet.atk_debuff>0){
+			var atkdebuff={"id":bullet.atk_debuff,"duration":bullet.atk_debuff_time};
+			var tindex=soldier.atk_debuff.existKey("id",atkdebuff["id"]);
+			if(tindex>0){
+				soldier.atk_debuff[tindex]["duration"]=atkdebuff["duration"];
+			}else{
+				soldier.atk_debuff.push(atkdebuff);
+			}
+		}
+		if(bullet.def_debuff>0){
+			var defdebuff={"id":bullet.def_debuff,"duration":bullet.def_debuff_time};
+			var tindex=soldier.def_debuff.existKey("id",defdebuff["id"]);
+			if(tindex>0){
+				soldier.def_debuff[tindex]["duration"]=defdebuff["duration"];
+			}else{
+				soldier.def_debuff.push(defdebuff);
+			}
+		}
+		if(bullet.extra_debuff>0){
+			var extradebuff={"id":bullet.extra_debuff,"duration":bullet.extra_debuff_time};
+			var tindex=soldier.extra_debuff.existKey("id",extradebuff["id"]);
+			if(tindex>0){
+				soldier.extra_debuff[tindex]["duration"]=extradebuff["duration"];
+			}else{
+				soldier.extra_debuff.push(extradebuff);
+			}
+		}
+	},
 	reduceBuffCDTime: function(){
 		for(var i=0;i<this.teamArr1.length;i++){
 			this.teamArr1[i].reduceBuffDebuffTime();
@@ -1147,6 +1401,20 @@ var MainLayer=cc.Layer.extend({
 		for(var i=0;i<this.teamArr2.length;i++){
 			this.teamArr2[i].reduceBuffDebuffTime();
 			this.teamArr2[i].reduceSkillCD();
+		}
+		// 图腾持续时间
+		var tempToDelTotem=new Array();
+		for(var i=0;i<this.totemArr.length;i++){
+			this.totemArr[i].last_time-=1;
+			console.log("totem remain:",this.totemArr[i].last_time)
+			if(this.totemArr[i].last_time<=0){
+				tempToDelTotem.push(this.totemArr[i]);
+			}
+		}
+		// 移除图腾 不能在循环中移除 因为会影响数组长度
+		for(var i=0;i<tempToDelTotem.length;i++){
+			this.removeChild(tempToDelTotem[i]);
+			this.totemArr.remove(tempToDelTotem[i]);
 		}
 	},
 	soldierUpdateBuffDebuff: function(){

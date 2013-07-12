@@ -54,6 +54,14 @@ var SimpleShapeSprite=cc.Sprite.extend({
         		var point4=new cc.Point(this.width/2/this.scale,0-this.height/2/this.scale);
         		cc.drawingUtil.drawPoly(new Array(point1,point2,point3,point4),4,true,false);
         		break;
+        	case 4:
+        		//萨满 画个菱形
+        		var point1=new cc.Point(0,0-this.height/2/this.scale);
+        		var point2=new cc.Point(0-this.width/2/this.scale,0);
+        		var point3=new cc.Point(0,this.height/2/this.scale);
+        		var point4=new cc.Point(this.width/2/this.scale,0);
+        		cc.drawingUtil.drawPoly(new Array(point1,point2,point3,point4),4,true,false);
+        		break;
         }
 
         if(Game.showSpriteCollisionBorder){
