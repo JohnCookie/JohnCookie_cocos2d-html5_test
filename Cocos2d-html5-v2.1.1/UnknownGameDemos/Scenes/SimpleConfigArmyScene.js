@@ -6,10 +6,12 @@ var SimpleConfigArmyLayer=cc.Layer.extend({
 	soldier2Sprite:null,
 	soldier3Sprite:null,
 	soldier4Sprite:null,
+	soldier5Sprite:null,
 	soldier1mini:null,
 	soldier2mini:null,
 	soldier3mini:null,
 	soldier4mini:null,
+	soldier5mini:null,
 	army1Label:null,
 	army1border:null,
 	army2Label:null,
@@ -43,26 +45,32 @@ var SimpleConfigArmyLayer=cc.Layer.extend({
         this.soldier1Sprite=cc.Sprite.create(SoldierData[1]["img"]);
         var spriteSize=this.soldier1Sprite.getContentSize();
         this.soldier1Sprite.setScale(50/spriteSize.width); // 精灵宽度100
-        this.soldier1Sprite.setPosition(size.width/2-150,size.height/2+50);
+        this.soldier1Sprite.setPosition(size.width/2-200,size.height/2+50);
         this.addChild(this.soldier1Sprite);
 
         this.soldier2Sprite=cc.Sprite.create(SoldierData[2]["img"]);
         var spriteSize=this.soldier2Sprite.getContentSize();
         this.soldier2Sprite.setScale(50/spriteSize.width); // 精灵宽度100
-        this.soldier2Sprite.setPosition(size.width/2-50,size.height/2+50);
+        this.soldier2Sprite.setPosition(size.width/2-100,size.height/2+50);
         this.addChild(this.soldier2Sprite);
 
         this.soldier3Sprite=cc.Sprite.create(SoldierData[3]["img"]);
         var spriteSize=this.soldier3Sprite.getContentSize();
         this.soldier3Sprite.setScale(50/spriteSize.width); // 精灵宽度100
-        this.soldier3Sprite.setPosition(size.width/2+50,size.height/2+50);
+        this.soldier3Sprite.setPosition(size.width/2,size.height/2+50);
         this.addChild(this.soldier3Sprite);
 
         this.soldier4Sprite=cc.Sprite.create(SoldierData[4]["img"]);
         var spriteSize=this.soldier4Sprite.getContentSize();
         this.soldier4Sprite.setScale(50/spriteSize.width); // 精灵宽度100
-        this.soldier4Sprite.setPosition(size.width/2+150,size.height/2+50);
+        this.soldier4Sprite.setPosition(size.width/2+100,size.height/2+50);
         this.addChild(this.soldier4Sprite);
+
+        this.soldier5Sprite=cc.Sprite.create(SoldierData[5]["img"]);
+        var spriteSize=this.soldier5Sprite.getContentSize();
+        this.soldier5Sprite.setScale(50/spriteSize.width); // 精灵宽度100
+        this.soldier5Sprite.setPosition(size.width/2+200,size.height/2+50);
+        this.addChild(this.soldier5Sprite);
 
         //提示语句
         this.promptLabel=cc.LabelTTF.create("Drag Soldiers To The Army Rect\r\nClick To Cancel Soldier In Army", "Arial", 18);
@@ -95,6 +103,7 @@ var SimpleConfigArmyLayer=cc.Layer.extend({
         this.soldier2mini=new SoldierMiniSprite(2);
         this.soldier3mini=new SoldierMiniSprite(3);
         this.soldier4mini=new SoldierMiniSprite(4);
+        this.soldier5mini=new SoldierMiniSprite(5);
 
         this.refreshSoldierArmy();
 	},
@@ -104,6 +113,7 @@ var SimpleConfigArmyLayer=cc.Layer.extend({
 		this.removeChild(this.soldier2mini);
 		this.removeChild(this.soldier3mini);
 		this.removeChild(this.soldier4mini);
+		this.removeChild(this.soldier5mini);
 		if(this.touchStatus>0){
 			//这是安排队伍
 			if(cc.rectContainsPoint(this.army1border.getBoundingBox(),touchPoint)){
@@ -162,6 +172,11 @@ var SimpleConfigArmyLayer=cc.Layer.extend({
 			this.addChild(this.soldier4mini);
 			this.touchStatus=4;
 		}
+		if(cc.rectContainsPoint(this.soldier5Sprite.getBoundingBox(),touchPoint)){
+			this.soldier5mini.setPosition(touchPoint);
+			this.addChild(this.soldier5mini);
+			this.touchStatus=5;
+		}
 	},
 	onTouchesMoved: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();
@@ -178,6 +193,9 @@ var SimpleConfigArmyLayer=cc.Layer.extend({
 					break;
 				case 4:
 					this.soldier4mini.setPosition(touchPoint);
+					break;
+				case 5:
+					this.soldier5mini.setPosition(touchPoint);
 					break;
 			}
 		}

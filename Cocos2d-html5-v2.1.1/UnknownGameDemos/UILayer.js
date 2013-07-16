@@ -8,6 +8,7 @@ var UILayer=cc.Layer.extend({
 	showSpriteCollisionBorderBtn:null,
 	testSkillBtn:null,
 	gameResultLabel:null, // 显示游戏结果的label
+	miniMap:null,
 	init: function(){
 		this._super();
 		this.setTouchEnabled(true);
@@ -70,6 +71,11 @@ var UILayer=cc.Layer.extend({
 		this.gameResultLabel.setPosition(size.width/2,size.height/2);
 		this.gameResultLabel.setColor(commonColor3B["red"]);
 		// this.addChild(this.gameResultLabel);
+
+		// 小地图显示
+		this.miniMap=new MinimapSprite();
+		this.miniMap.setPosition(Game.width-130,Game.height-130);
+		this.addChild(this.miniMap);
 	},
 	onTouchesEnded: function(pTouch, pEvent){
 		var touchPoint=pTouch[0].getLocation();

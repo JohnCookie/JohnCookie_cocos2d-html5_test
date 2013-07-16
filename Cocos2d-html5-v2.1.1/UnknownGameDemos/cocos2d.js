@@ -9,7 +9,7 @@
         frameRate:60,
         tag:'gameCanvas', //the dom element to run cocos2d on
         engineDir:'../cocos2d/',
-        appFiles:['global.js','data/SoldierData.js','data/SkillData.js','data/BuffData.js','data/DebuffData.js','Sprites/ArrowSprite.js','Sprites/SimpleStatusSprite.js','Sprites/SimpleEffectSprite.js','Sprites/SimpleSkillSprite.js','Sprites/SimpleHPSprite.js','Sprites/SimpleShapeSprite.js','Sprites/SimpleBtnSprite.js','Sprites/BaseSoldierSprite.js','Sprites/SimpleBloodSprite.js','Sprites/SimpleBulletSprite.js','Sprites/TotemSprite.js','MapLayer.js','MainLayer.js','UILayer.js','MyFirstApp.js','GameScene.js','Scenes/AttributeAdjustSprite.js','Scenes/SimpleSoldierAttrScene.js','Scenes/StartGameScene.js','Scenes/SoliderAdjustLayer.js','Scenes/SimpleConfigArmyScene.js','Scenes/SoldierMiniSprite.js','Scenes/SimpleArmyShowSprite.js']
+        appFiles:['global.js','data/SoldierData.js','data/SkillData.js','data/BuffData.js','data/DebuffData.js','Sprites/ArrowSprite.js','Sprites/SimpleStatusSprite.js','Sprites/SimpleEffectSprite.js','Sprites/SimpleSkillSprite.js','Sprites/SimpleHPSprite.js','Sprites/SimpleShapeSprite.js','Sprites/SimpleBtnSprite.js','Sprites/BaseSoldierSprite.js','Sprites/SimpleBloodSprite.js','Sprites/SimpleBulletSprite.js','Sprites/TotemSprite.js','Sprites/MinimapSprite.js','MapLayer.js','MainLayer.js','UILayer.js','MyFirstApp.js','GameScene.js','Scenes/AttributeAdjustSprite.js','Scenes/SimpleSoldierAttrScene.js','Scenes/StartGameScene.js','Scenes/SoliderAdjustLayer.js','Scenes/SimpleConfigArmyScene.js','Scenes/SoldierMiniSprite.js','Scenes/SimpleArmyShowSprite.js']
     };
     window.addEventListener('DOMContentLoaded', function () {
         //first load engine file if specified

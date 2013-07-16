@@ -78,5 +78,25 @@ var SoldierData={
 		"addition_def":0,
 		"addition_blood":0,
 		"addition_agility":0
+	},
+	5:{
+		"name":"Dragon Knight",
+		"atk":40, // 攻击力
+		"def":22, // 防御力
+		"mass":18, // 质量 决定碰撞时会产生的效果
+		"blood":120, // 血量
+		"radius":20, // 碰撞时用的半径
+		"type":1, // 士兵类型 1近战 2远程 3魔法
+		"friction":0.985, //摩擦力 决定弹射距离
+		"resistance":0.855, //阻力 决定被撞击时后退的距离
+		"agility":30, //敏捷 行动力 决定2次行动之间相隔时间
+		"dist":0,
+		"img":"Sprites/spriteRes/heros/dragon_knight.png", //英雄头像
+		"skill1":9, //技能1的id
+		"skill2":10, //技能2的id
+		"addition_atk":0,
+		"addition_def":0,
+		"addition_blood":0,
+		"addition_agility":0
 	}
 }

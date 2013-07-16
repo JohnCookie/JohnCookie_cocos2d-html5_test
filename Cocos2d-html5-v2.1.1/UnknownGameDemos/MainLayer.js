@@ -100,8 +100,9 @@ var MainLayer=cc.Layer.extend({
 				arrowScale=0.4;
 			}
 
-			var angle = Math.atan2(realTouchPoint.x-this.tempTouchPoint.x,realTouchPoint.y-this.tempTouchPoint.y);
-			
+			//原来的 正向拖出 现在改成反向了
+			// var angle = Math.atan2(realTouchPoint.x-this.tempTouchPoint.x,realTouchPoint.y-this.tempTouchPoint.y);
+			var angle = Math.atan2(-realTouchPoint.x+this.tempTouchPoint.x,-realTouchPoint.y+this.tempTouchPoint.y);
 
 			if(this.arrowSprite!=null){
 				this.removeChild(this.arrowSprite);
@@ -183,7 +184,9 @@ var MainLayer=cc.Layer.extend({
 			}
 			this.arrowSprite.setScaleY(arrowScale);
 
-			var angle = Math.atan2(realTouchNow.x-this.tempTouchPoint.x,realTouchNow.y-this.tempTouchPoint.y);
+			//原来的 正向拖出 现在改成反向了
+			// var angle = Math.atan2(realTouchNow.x-this.tempTouchPoint.x,realTouchNow.y-this.tempTouchPoint.y);
+			var angle = Math.atan2(-realTouchNow.x+this.tempTouchPoint.x,-realTouchNow.y+this.tempTouchPoint.y);
 			angle = angle*(180/Math.PI);
 			this.arrowSprite.setRotation(angle);
 		}
@@ -439,12 +442,21 @@ var MainLayer=cc.Layer.extend({
 						//2队行动 并且产生了碰撞
 						if(this.teamArr1[i]!=this.lastHurtedSprite){
 							//同一个不会在一次碰撞中连续受到伤害
-							// this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
-							this.makeDamageWithBuff(this.teamArr1[i]);
+							if(this.activeSprite.power>0){
+								this.makeDamageWithBuff(this.teamArr1[i],this.activeSprite.power);
+							}else{
+								this.makeDamageWithBuff(this.teamArr1[i]);
+							}
 						}
 						if(this.teamArr1[j]!=this.lastHurtedSprite){
-							// this.teamArr1[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[j].type]["def"]);
-							this.makeDamageWithBuff(this.teamArr1[j]);
+							if(this.activeSprite.power>0){
+								this.makeDamageWithBuff(this.teamArr1[j],this.activeSprite.power);
+							}else{
+								this.makeDamageWithBuff(this.teamArr1[j]);
+							}
+						}
+						if(this.activeSprite.extraAction>0){
+							this.activeSprite.doExtraAction();
 						}
 					}
 				}
@@ -455,12 +467,21 @@ var MainLayer=cc.Layer.extend({
 					if(this.activeSprite.team==0 && collided["collided"]){
 						if(this.teamArr2[i]!=this.lastHurtedSprite){
 							//同一个不会在一次碰撞中连续受到伤害
-							// this.teamArr2[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[i].type]["def"]);
-							this.makeDamageWithBuff(this.teamArr2[i]);
+							if(this.activeSprite.power>0){
+								this.makeDamageWithBuff(this.teamArr2[i],this.activeSprite.power);
+							}else{
+								this.makeDamageWithBuff(this.teamArr2[i]);
+							}
 						}
 						if(this.teamArr2[j]!=this.lastHurtedSprite){
-							// this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
-							this.makeDamageWithBuff(this.teamArr2[j]);
+							if(this.activeSprite.power>0){
+								this.makeDamageWithBuff(this.teamArr2[j],this.activeSprite.power);
+							}else{
+								this.makeDamageWithBuff(this.teamArr2[j]);
+							}
+						}
+						if(this.activeSprite.extraAction>0){
+							this.activeSprite.doExtraAction();
 						}
 					}
 				}
@@ -473,15 +494,25 @@ var MainLayer=cc.Layer.extend({
 						//敌对有碰撞
 						if(this.activeSprite.team==0){
 							//1队行动 2队受伤
-							// this.teamArr2[j].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr2[j].type]["def"]);
-							this.makeDamageWithBuff(this.teamArr2[j]);
+							if(this.activeSprite.power>0){
+								this.makeDamageWithBuff(this.teamArr2[j],this.activeSprite.power);
+							}else{
+								this.makeDamageWithBuff(this.teamArr2[j]);
+							}
 							this.lastHurtedSprite=this.teamArr2[j];
 						}
 						if(this.activeSprite.team==1){
 							//2队行动 1队受伤
-							// this.teamArr1[i].getDamage(SoldierData[this.activeSprite.type]["atk"]-SoldierData[this.teamArr1[i].type]["def"]);
-							this.makeDamageWithBuff(this.teamArr1[i]);
+							if(this.activeSprite.power>0){
+								this.makeDamageWithBuff(this.teamArr1[i],this.activeSprite.power);
+							}else{
+								this.makeDamageWithBuff(this.teamArr1[i]);
+							}
 							this.lastHurtedSprite=this.teamArr1[i];
+						}
+						console.log("extra action",this.activeSprite.extraAction);
+						if(this.activeSprite.extraAction>0){
+							this.activeSprite.doExtraAction();
 						}
 					}
 				}
@@ -854,6 +885,31 @@ var MainLayer=cc.Layer.extend({
 					this.totemArr.push(totem);
 				}
 				break;
+			case 4:
+				if(skillId==9){
+					// 龙骑冲锋
+					// 冲撞后返回原地 如果没有击中
+					// 记录原来位置 并创建一个自定义回调用函数 同时添加一个标志位状态
+					console.log("Dragon Knight's Charge");
+					soldier.extraAction=1; // 设置额外变量
+					soldier.originalPosition=soldier.getPosition();
+					console.log(soldier.originalPosition);
+					soldier.power=SkillData[9]["power"];
+					soldier.extraActionCallback=function(soldier){
+						soldier.extraAction=0;
+						soldier.power=0;
+						console.log("extra Action Callback!");
+					}
+					soldier.doExtraAction=function(soldier){
+						console.log(this);
+						var jumpAction=cc.JumpTo.create(0.5, this.originalPosition, 100, 1);
+						var rotateAction=cc.RotateBy.create(1,360);
+						var jumpAndRotateAction=cc.Spawn.create([jumpAction,rotateAction]);
+						var actionCallback=cc.CallFunc.create(this.extraActionCallback,this);
+						var actionFinal=cc.Sequence.create(jumpAndRotateAction,actionCallback);
+						this.runAction(actionFinal);
+					}
+				}
 		}
 		// 重新统计技能CD
 		if(skillUsed==1){

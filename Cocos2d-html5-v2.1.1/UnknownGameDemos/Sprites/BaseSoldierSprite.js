@@ -464,5 +464,5 @@ var BaseSoldierSprite=cc.Sprite.extend({
 		if(this.skill2_cd<0){
 			this.skill2_cd=0;
 		}
-	}
+	},
 });

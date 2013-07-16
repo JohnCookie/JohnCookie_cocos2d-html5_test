@@ -100,5 +100,21 @@ var SkillData={
 		"duration":25,
 		"img":"Sprites/spriteRes/skills/8.png",
 		"cd":32
+	},
+	9:{
+		"name":"Dragon Charge", // 龙骑冲锋 冲击目标并返回原来位置
+		"type":4,
+		"power":50,
+		"img":"Sprites/spriteRes/skills/8.png",
+		"cd":0
+	},
+	10:{
+		"name":"Sweep Away", // 横扫攻击 前方范围内攻击复数敌人
+		"type":3,
+		"extra_buff":1,
+		"radius":150,
+		"duration":25,
+		"img":"Sprites/spriteRes/skills/8.png",
+		"cd":0
 	}
 }
