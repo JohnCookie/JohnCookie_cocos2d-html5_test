@@ -13,6 +13,7 @@ var MainLayer=cc.Layer.extend({
 	lastHurtedSprite: null,
 	status: 0, //0 normal 1 sprite being touched
 	__scaleBase: 50, 
+	extraStatus: 0,
 	init: function(){
 		this._super();
 		this.setTouchEnabled(true);
@@ -34,7 +35,7 @@ var MainLayer=cc.Layer.extend({
 		// console.log(this.bulletArr.length);
 		if(Game.gameStatus==Game.status.END){
 			console.log("Game is End");
-		}else if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0 && this.healBulletArr.length<=0 && this.blendedBulletArr.length<=0){
+		}else if(Game.gameStatus==Game.status.NORMAL && this.allSoldierMoveEnd() && this.bulletArr.length<=0 && this.specialFlyerArr.length<=0 && this.healBulletArr.length<=0 && this.blendedBulletArr.length<=0 && this.extraStatus==0){
 			if(Game.targetShowed==false){
 				console.log("next round");
 				if(this.teamArr1.length<=0 || this.teamArr2.length<=0){
@@ -110,10 +111,10 @@ var MainLayer=cc.Layer.extend({
 
 			//精灵行动
 			//精灵移动
-			this.activeSprite.vx=arrowScale*4*Math.sin(angle);
-			this.activeSprite.vy=arrowScale*4*Math.cos(angle);
-			angle1 = angle*(180/Math.PI);
-			this.activeSprite.mainSprite.setRotation(angle1);
+			// this.activeSprite.vx=arrowScale*4*Math.sin(angle);
+			// this.activeSprite.vy=arrowScale*4*Math.cos(angle);
+			// var angle1 = angle*(180/Math.PI);
+			// this.activeSprite.mainSprite.setRotation(angle1);
 
 			// 使用技能
 			var skillUsed=this.getParent().uiLayer.getSkillUsed();
@@ -127,7 +128,20 @@ var MainLayer=cc.Layer.extend({
 					//如果是激活的buff类技能 那么只是赋予状态 常规工作仍要继续完成
 					this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
 				}
+				if(SkillData[SoldierData[this.activeSprite.type]["skill"+skillUsed]]["type"]!=5){
+					//精灵移动
+					this.activeSprite.vx=arrowScale*4*Math.sin(angle);
+					this.activeSprite.vy=arrowScale*4*Math.cos(angle);
+					var angle1 = angle*(180/Math.PI);
+					this.activeSprite.mainSprite.setRotation(angle1);
+				}
 			}else{
+				//精灵移动
+				this.activeSprite.vx=arrowScale*4*Math.sin(angle);
+				this.activeSprite.vy=arrowScale*4*Math.cos(angle);
+				var angle1 = angle*(180/Math.PI);
+				this.activeSprite.mainSprite.setRotation(angle1);
+
 				this.soldierAttackAction(this.activeSprite,angle); // angle为初始值
 			}
 
@@ -910,6 +924,127 @@ var MainLayer=cc.Layer.extend({
 						this.runAction(actionFinal);
 					}
 				}
+				break;
+			case 5:
+				if(skillId==10){
+					// 龙骑顺劈斩
+					// 横扫前方 造成伤害
+					console.log("Dragon Knight's Sweep Away");
+					var center=soldier.getCenterPosition();
+					
+					var effectSprite=cc.Sprite.create("Sprites/spriteRes/effect/test2.png");
+					var angle1 = angle*(180/Math.PI);
+					effectSprite.setRotation(angle1);
+					effectSprite.setScale(0.3);
+					effectSprite.setPosition(center.x+Math.sin(angle)*50,center.y+Math.cos(angle)*50);
+
+					effectSprite.power=SkillData[10]["power"];
+					effectSprite.range=SkillData[10]["range"];
+					effectSprite.angle=SkillData[10]["angle"];
+
+					effectSprite.removeSelfCallback=function(effect,param){
+						// soldier effect parent传进来的值不对 非常奇怪
+						console.log("param",param);
+						var soldier=param[0];
+						var effect=param[1];
+						var parent=param[2];
+						var arrowAngle=param[3];
+
+						var angleUp=arrowAngle+effect.range/2;
+						var angleDown=arrowAngle-effect.range/2;
+						var angleType=0; // 正常范围 1 负数范围 2 正数范围
+						if(angleUp>180){
+							angleType=2;
+						}
+						if(angleDown<-180){
+							angleType=1;
+						}
+
+
+						var selfCenter=soldier.getCenterPosition();
+						if(soldier.team==0){
+							for(var i=0;i<parent.teamArr2.length;i++){
+								// 范围内的
+								var pos=parent.teamArr2[i].getCenterPosition();
+								var dist=Math.pow(pos.x-selfCenter.x, 2)+Math.pow(pos.y-selfCenter.y, 2);
+								if(dist<=Math.pow(soldier.radius+effect.range, 2)){
+									// 在范围内
+									// 判断在角度内
+									var dx=pos.x-selfCenter.x;
+									var dy=pos.y-selfCenter.y;
+									var angle=Math.atan2(dx,dy);
+									var angle2 = angle*(180/Math.PI);
+									switch(angleType){
+										case 0:
+											angle3 = angle2;
+											break;
+										case 1:
+											angle3 = angle2-360;
+											break;
+										case 2:
+											angle3 = angle2+360;
+											break;
+									}
+									if((angle2<angleUp && angle2>angleDown) || (angle3<angleUp && angle3>angleDown)){
+										// 在范围内 那么造成伤害
+										var power=effect.power;
+										parent.makeDamageWithBuff(parent.teamArr2[i],power);
+									}
+								}
+							}
+						}
+						if(soldier.team==1){
+							for(var i=0;i<parent.teamArr1.length;i++){
+								// 范围内的
+								var pos=parent.teamArr1[i].getCenterPosition();
+								var dist=Math.pow(pos.x-selfCenter.x, 2)+Math.pow(pos.y-selfCenter.y, 2);
+								if(dist<=Math.pow(soldier.radius+effect.range,2)){
+									// 在范围内
+									// 判断在角度内
+									var dx=pos.x-selfCenter.x;
+									var dy=pos.y-selfCenter.y;
+									var angle=Math.atan2(dx,dy);
+									var angle2 = angle*(180/Math.PI);
+									switch(angleType){
+										case 0:
+											angle3 = angle2;
+											break;
+										case 1:
+											angle3 = angle2-360;
+											break;
+										case 2:
+											angle3 = angle2+360;
+											break;
+									}
+									if((angle2<angleUp && angle2>angleDown) || (angle3<angleUp && angle3>angleDown)){
+										// 在范围内 那么造成伤害
+										var power=effect.power;
+										parent.makeDamageWithBuff(parent.teamArr1[i],power);
+									}
+								}
+							}
+						}
+
+						Game.gameStatus=Game.status.NORMAL;
+
+						parent.removeChild(effect);
+						console.log("remove self!!!!");
+						parent.extraStatus=0;
+					}
+					//一个动作 渐渐放大并渐淡
+					var scaleAction=cc.ScaleTo.create(1,1);
+					var moveAction=cc.MoveTo.create(1,new cc.Point(center.x+Math.sin(angle)*100,center.y+Math.cos(angle)*100));
+					var fadeOutAction=cc.FadeOut.create(1.5);
+					var scaleMoveFadeoutAction=cc.Spawn.create([scaleAction,moveAction,fadeOutAction]);
+					var actionCallback=cc.CallFunc.create(effectSprite.removeSelfCallback,effectSprite,[soldier,effectSprite,this,angle1]);
+					var actionFinal=cc.Sequence.create(scaleMoveFadeoutAction,actionCallback);
+
+					this.addChild(effectSprite);
+					effectSprite.runAction(actionFinal);
+					Game.gameStatus=Game.status.ANIM_ON;
+					this.extraStatus=1;
+				}
+				break;
 		}
 		// 重新统计技能CD
 		if(skillUsed==1){
@@ -1211,6 +1346,10 @@ var MainLayer=cc.Layer.extend({
 	makeDamageWithBuff: function(defSoldier,power){
 		// 攻防
 		var attack=SoldierData[this.activeSprite.type]["atk"]+SoldierData[this.activeSprite.type]["addition_atk"];
+		if(this.activeSprite.type==5){
+			// 龙骑兵 攻击还会带有速度加成
+			attack=Math.floor(attack+Math.sqrt(Math.pow(this.activeSprite.vx,2)+Math.pow(this.activeSprite.vy, 2)));
+		}
 		if(power){
 			attack=power;
 		}

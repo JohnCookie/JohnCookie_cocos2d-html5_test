@@ -17,6 +17,9 @@
 	正式的
 	type 1: 给自身激活某种buff/debuff的技能 （双倍攻击，盾墙等） 使用后 仍要继续进行一轮基础行动
 	type 2: 发射性技能 固定伤害的攻击技能 射出子弹等
+	type 3: 放置一个物体 例如萨满
+	type 4: 攻击 提供回调额外动作的
+	type 5: 精灵取消自身移动的 原地释放
 */
 var SkillData={
 	1:{
@@ -109,11 +112,11 @@ var SkillData={
 		"cd":0
 	},
 	10:{
-		"name":"Sweep Away", // 横扫攻击 前方范围内攻击复数敌人
-		"type":3,
-		"extra_buff":1,
-		"radius":150,
-		"duration":25,
+		"name":"Sweep Away", // 横扫攻击 前方范围内攻击复数敌人 前方120度 距离180
+		"type":5,
+		"range":180,
+		"power":40,
+		"angle":120,
 		"img":"Sprites/spriteRes/skills/8.png",
 		"cd":0
 	}

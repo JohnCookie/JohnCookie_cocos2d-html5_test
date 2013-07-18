@@ -69,7 +69,8 @@ var cocos2dApp = cc.Application.extend({
             {type:"image", src:"Sprites/spriteRes/skills/6.png"},
             {type:"image", src:"Sprites/spriteRes/skills/7.png"},
             {type:"image", src:"Sprites/spriteRes/skills/8.png"},
-            {type:"image", src:"Sprites/spriteRes/totem.png"}
+            {type:"image", src:"Sprites/spriteRes/totem.png"},
+            {type:"image", src:"Sprites/spriteRes/effect/test2.png"}
         ]);
     },
     applicationDidFinishLaunching:function () {
